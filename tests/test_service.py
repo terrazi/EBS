@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from ebs.service import EBSService
@@ -81,6 +82,52 @@ class EBSServiceTests(unittest.TestCase):
         self.assertTrue(replay["duplicate"])
         self.assertEqual(self.service.events()[0]["reference"], first["reference"])
         self.assertEqual(self.service.card_events("in-012")[0]["action"], "test")
+
+    def test_idempotency_key_cannot_be_reused_for_a_different_request(self) -> None:
+        account = self.service.accounts(1)[0]
+        self.service.open_cash("gise01", "terminal-test")
+        self.service.deposit(
+            {"customer_id": 1, "account_id": account["id"], "amount": "1.000,00"},
+            "gise01",
+            "terminal-test",
+            "same-key",
+        )
+        with self.assertRaisesRegex(ValueError, "farklı içerikli"):
+            self.service.deposit(
+                {"customer_id": 1, "account_id": account["id"], "amount": "2.000,00"},
+                "gise01",
+                "terminal-test",
+                "same-key",
+            )
+
+    def test_fractional_minor_amount_is_rejected_without_truncation(self) -> None:
+        account = self.service.accounts(1)[0]
+        self.service.open_cash("gise01", "terminal-test")
+        with self.assertRaisesRegex(ValueError, "tam sayı"):
+            self.service.deposit(
+                {"customer_id": 1, "account_id": account["id"], "amount_minor": 100.5},
+                "gise01",
+                "terminal-test",
+                "fractional-minor",
+            )
+
+    def test_concurrent_deposits_keep_the_shared_connection_consistent(self) -> None:
+        account = self.service.accounts(1)[0]
+        self.service.open_cash("gise01", "terminal-test")
+        before = account["balance_minor"]
+
+        def deposit(index: int) -> dict:
+            return self.service.deposit(
+                {"customer_id": 1, "account_id": account["id"], "amount": "100,00"},
+                "gise01",
+                "terminal-test",
+                f"concurrent-{index}",
+            )
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            results = list(pool.map(deposit, range(4)))
+        self.assertTrue(all(result["balanced"] for result in results))
+        self.assertEqual(self.service.accounts(1)[0]["balance_minor"], before + 4 * 10_000)
 
 
 if __name__ == "__main__":
