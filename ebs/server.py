@@ -47,6 +47,25 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
             return None
         return user
 
+    def _staff_user(self, required: bool = True) -> dict | None:
+        """Return an authenticated back-office user for management APIs."""
+        user = self._user(required=required)
+        if user is None:
+            return None
+        if user.get("role") not in {"ADMIN", "PERSONEL"}:
+            self._error("Bu işlem yalnızca personel oturumu ile yapılabilir.", HTTPStatus.FORBIDDEN)
+            return None
+        return user
+
+    def _admin_user(self) -> dict | None:
+        user = self._user(required=True)
+        if user is None:
+            return None
+        if user.get("role") != "ADMIN":
+            self._error("Bu işlem yalnızca yönetici oturumu ile yapılabilir.", HTTPStatus.FORBIDDEN)
+            return None
+        return user
+
     def _json_body(self) -> dict:
         length = int(self.headers.get("Content-Length", "0"))
         if length > 1_000_000:
@@ -93,10 +112,20 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                     return self._error("Dosya yolu geçersiz.", HTTPStatus.NOT_FOUND)
                 return self._send_bytes(relative.read_bytes(), mimetypes.guess_type(relative.name)[0] or "application/octet-stream")
             if path.startswith("/documents/"):
+                user = self._user(required=True)
+                if user is None:
+                    return
                 relative = Path(path.removeprefix("/documents/"))
                 document = (self.ebs_server.service.document_dir / relative).resolve()
                 if self.ebs_server.service.document_dir.resolve() not in document.parents:
                     return self._error("Belge yolu geçersiz.", HTTPStatus.NOT_FOUND)
+                if user["role"] == "CUSTOMER":
+                    row = self.ebs_server.service.db.execute(
+                        "SELECT t.customer_id FROM documents d JOIN transactions t ON t.id=d.transaction_id WHERE d.path=?",
+                        (relative.as_posix(),),
+                    ).fetchone()
+                    if not row or row["customer_id"] != user.get("customer_id"):
+                        return self._error("Bu belgeye erişim yetkiniz yok.", HTTPStatus.FORBIDDEN)
                 return self._send_bytes(document.read_bytes(), "application/pdf")
             if path == "/api/health":
                 return self._send_json(self.ebs_server.service.health())
@@ -113,6 +142,8 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                     return self._send_json({"user": user, "permissions": ["read", "self_service"] if user["role"] == "CUSTOMER" else ["read", "write"]})
                 return
             if path == "/api/dashboard":
+                if self._staff_user() is None:
+                    return
                 return self._send_json(self.ebs_server.service.dashboard())
             if path == "/api/manifest":
                 manifest = ROOT / "manifest" / "cards.json"
@@ -121,6 +152,8 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                 manifest = ROOT / "manifest" / "cards.json"
                 return self._send_bytes(manifest.read_bytes(), "application/json; charset=utf-8")
             if path.startswith("/api/card/"):
+                if self._staff_user() is None:
+                    return
                 code = path.removeprefix("/api/card/").strip()
                 if not code:
                     return self._error("Kart kodu zorunludur.")
@@ -131,7 +164,7 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
             if path == "/runtime.json":
                 return self._send_json({"version": "0.1.0", "port": 8792, "legacy_url": "/legacy/", "legacy_required": False, "server": "central-v3"})
             if path == "/api/users":
-                if self._user(required=True) is None:
+                if self._staff_user() is None:
                     return
                 return self._send_json(self.ebs_server.service.users())
             if path == "/api/customer-portal/summary":
@@ -145,23 +178,51 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                     return self._send_json({"error": "Müşteri bulunamadı."}, HTTPStatus.NOT_FOUND)
                 return self._send_json({"customer": {key: result[key] for key in ("id", "code", "name", "demo_identity", "segment", "phone", "email", "city", "status")}, **{key: result[key] for key in ("accounts", "cards", "loans", "policies", "claims")}})
             if path == "/api/customers":
+                if self._staff_user() is None:
+                    return
                 return self._send_json(self.ebs_server.service.customers(query.get("q", [""])[0]))
             if path.startswith("/api/customers/") and path.endswith("/360"):
+                if self._staff_user() is None:
+                    return
                 customer_id = int(path.split("/")[3])
                 result = self.ebs_server.service.customer_360(customer_id)
                 return self._send_json(result or {"error": "Müşteri bulunamadı."}, HTTPStatus.OK if result else HTTPStatus.NOT_FOUND)
             if path == "/api/accounts":
                 customer_id = int(query["customer_id"][0]) if query.get("customer_id") else None
+                user = self._user(required=True)
+                if user is None:
+                    return
+                if user["role"] == "CUSTOMER":
+                    if customer_id is None or customer_id != user.get("customer_id"):
+                        return self._error("Yalnızca kendi hesaplarınızı görüntüleyebilirsiniz.", HTTPStatus.FORBIDDEN)
+                elif user["role"] not in {"ADMIN", "PERSONEL"}:
+                    return self._error("Bu işlem için personel oturumu gerekir.", HTTPStatus.FORBIDDEN)
                 return self._send_json(self.ebs_server.service.accounts(customer_id))
             if path == "/api/campaigns":
+                if self._user(required=True) is None:
+                    return
                 return self._send_json(self.ebs_server.service.campaigns())
             if path == "/api/transactions":
-                return self._send_json(self.ebs_server.service.transactions(int(query.get("limit", [50])[0])))
+                user = self._user(required=True)
+                if user is None:
+                    return
+                customer_id = None
+                if user["role"] == "CUSTOMER":
+                    customer_id = user.get("customer_id")
+                elif user["role"] not in {"ADMIN", "PERSONEL"}:
+                    return self._error("Bu işlem için personel oturumu gerekir.", HTTPStatus.FORBIDDEN)
+                return self._send_json(self.ebs_server.service.transactions(int(query.get("limit", [50])[0]), customer_id))
             if path == "/api/audit":
+                if self._staff_user() is None:
+                    return
                 return self._send_json(self.ebs_server.service.audit(int(query.get("limit", [100])[0])))
             if path == "/api/work-items":
+                if self._staff_user() is None:
+                    return
                 return self._send_json(self.ebs_server.service.work_items(query.get("status", [None])[0]))
             if path == "/api/events":
+                if self._staff_user() is None:
+                    return
                 return self._send_json({"events": self.ebs_server.service.events(int(query.get("limit", [100])[0]))})
             return self._error("Kaynak bulunamadı.", HTTPStatus.NOT_FOUND)
         except FileNotFoundError:
@@ -187,26 +248,26 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                 service.logout(self._token())
                 return self._send_json({"status": "signed_out"})
             if path == "/api/demo/reset":
-                if self._user(required=True) is None:
+                if self._admin_user() is None:
                     return
                 return self._send_json({"status": "reset", "counts": service.reset_demo()})
             if path == "/api/cash/open":
-                user = self._user(required=True)
+                user = self._staff_user()
                 if user is None:
                     return
                 return self._send_json(service.open_cash(user["username"], self._terminal()))
             if path == "/api/cash/deposit":
-                user = self._user(required=True)
+                user = self._staff_user()
                 if user is None:
                     return
                 return self._send_json(service.deposit(body, user["username"], self._terminal(), self.headers.get("Idempotency-Key")))
             if path == "/api/transfers":
-                user = self._user(required=True)
+                user = self._staff_user()
                 if user is None:
                     return
                 return self._send_json(service.transfer(body, user["username"], self._terminal(), self.headers.get("Idempotency-Key")))
             if path.startswith("/api/work-items/"):
-                user = self._user(required=True)
+                user = self._staff_user()
                 if user is None:
                     return
                 work_item_id = int(path.split("/")[3])

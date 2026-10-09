@@ -6,8 +6,10 @@ import sqlite3
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from functools import wraps
 from pathlib import Path
-from typing import Any
+from threading import RLock
+from typing import Any, Callable, ParamSpec, TypeVar
 
 from .db import initialize, json_text, row_to_dict, rows_to_dict
 
@@ -78,11 +80,55 @@ def parse_money(value: Any) -> int:
     return minor
 
 
+def parse_minor(value: Any) -> int:
+    """Validate an already-minor-unit amount without truncating input.
+
+    ``int(Decimal(...))`` silently turns malformed values such as ``1.9``
+    into ``1``. API callers must either send an integer or an integer string;
+    decimal display amounts belong in ``amount`` and are parsed by
+    :func:`parse_money`.
+    """
+    if isinstance(value, bool) or value is None:
+        raise ValueError("Tutar sayı olmalıdır.")
+    if isinstance(value, int):
+        minor = value
+    else:
+        text = str(value).strip()
+        if not text or not text.lstrip("-").isdigit():
+            raise ValueError("Kuruş tutarı tam sayı olmalıdır.")
+        minor = int(text)
+    if minor <= 0:
+        raise ValueError("Tutar sıfırdan büyük olmalıdır.")
+    return minor
+
+
 def format_money(minor: int, currency: str = "TRY") -> str:
     value = Decimal(minor) / 100
     text = f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     labels = {"TRY": "TL", "USD": "USD", "EUR": "EUR", "XAU": "gr."}
     return f"{text} {labels.get(currency, currency)}"
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def serialized_write(function: Callable[P, R]) -> Callable[P, R]:
+    """Serialize writes made through the shared SQLite connection.
+
+    The HTTP server uses a thread per request while one EBSService instance
+    owns one SQLite connection. SQLite serializes file access, but it cannot
+    safely interleave ``BEGIN``/``COMMIT`` calls on that shared connection.
+    Keeping the lock at the service boundary prevents a second request from
+    entering a transaction before the first one has committed.
+    """
+
+    @wraps(function)
+    def wrapped(self: "EBSService", *args: P.args, **kwargs: P.kwargs) -> R:
+        with self._write_lock:
+            return function(self, *args, **kwargs)
+
+    return wrapped
 
 
 def make_pdf(path: Path, title: str, lines: list[str]) -> None:
@@ -129,6 +175,10 @@ class EBSService:
         self.document_dir = document_dir or db_path.parent / "documents"
         self.document_dir.mkdir(parents=True, exist_ok=True)
         self.db = initialize(db_path)
+        # A service instance is shared by ThreadingHTTPServer worker threads.
+        # All mutating entry points below use this lock around their SQLite
+        # transaction so BEGIN/COMMIT pairs cannot overlap on one connection.
+        self._write_lock = RLock()
         self._ensure_v31_users()
         if self.db.execute("SELECT COUNT(*) FROM customers").fetchone()[0] == 0:
             self.reset_demo()
@@ -136,6 +186,7 @@ class EBSService:
     def close(self) -> None:
         self.db.close()
 
+    @serialized_write
     def _ensure_v31_users(self) -> None:
         """Migrate the first vertical slice's demo identities to v3.1 names."""
         aliases = {
@@ -189,6 +240,7 @@ class EBSService:
         ).fetchone()
         return row["debit"] == row["credit"] and row["debit"] > 0
 
+    @serialized_write
     def reset_demo(self) -> dict[str, int]:
         self.db.execute("BEGIN IMMEDIATE")
         try:
@@ -254,6 +306,7 @@ class EBSService:
     def health(self) -> dict[str, Any]:
         return {"status": "ok", "service": "EBS Merkezi İşlem Motoru", "version": "0.1.0", "port": 8792, "legacy_optional": True, "login": "central", "database": str(self.db_path), "demo": self.counts()}
 
+    @serialized_write
     def login(self, username: str, password: str) -> dict[str, Any]:
         row = self.db.execute(
             "SELECT id, username, display_name, role, department, customer_id, active FROM users WHERE lower(username)=lower(?) AND password=? AND active=1",
@@ -292,6 +345,7 @@ class EBSService:
         ).fetchone()
         return row_to_dict(row)
 
+    @serialized_write
     def logout(self, token: str | None) -> None:
         if token:
             self.db.execute("DELETE FROM sessions WHERE token=?", (token,))
@@ -353,9 +407,12 @@ class EBSService:
     def campaigns(self) -> list[dict[str, Any]]:
         return rows_to_dict(self.db.execute("SELECT * FROM campaigns ORDER BY id").fetchall())
 
-    def transactions(self, limit: int = 50) -> list[dict[str, Any]]:
+    def transactions(self, limit: int = 50, customer_id: int | None = None) -> list[dict[str, Any]]:
         limit = max(1, min(limit, 200))
-        rows = rows_to_dict(self.db.execute("SELECT t.*, c.name AS customer_name FROM transactions t LEFT JOIN customers c ON c.id=t.customer_id ORDER BY t.id DESC LIMIT ?", (limit,)).fetchall())
+        if customer_id is None:
+            rows = rows_to_dict(self.db.execute("SELECT t.*, c.name AS customer_name FROM transactions t LEFT JOIN customers c ON c.id=t.customer_id ORDER BY t.id DESC LIMIT ?", (limit,)).fetchall())
+        else:
+            rows = rows_to_dict(self.db.execute("SELECT t.*, c.name AS customer_name FROM transactions t LEFT JOIN customers c ON c.id=t.customer_id WHERE t.customer_id=? ORDER BY t.id DESC LIMIT ?", (customer_id, limit)).fetchall())
         for item in rows:
             item["amount_display"] = format_money(item["amount_minor"], item["currency"])
             item["payload"] = json.loads(item.pop("payload_json"))
@@ -374,6 +431,7 @@ class EBSService:
             item["payload"] = json.loads(item.pop("payload_json"))
         return result
 
+    @serialized_write
     def record_action(self, card_code: str, action: str, payload: Any, user: str, client: str = "", idempotency_key: str | None = None) -> dict[str, Any]:
         card_code = card_code.strip().upper()
         action = action.strip()
@@ -382,6 +440,18 @@ class EBSService:
         if idempotency_key:
             existing = self.db.execute("SELECT * FROM api_events WHERE idempotency_key=?", (idempotency_key,)).fetchone()
             if existing:
+                try:
+                    stored_payload = json.loads(existing["payload_json"])
+                except (TypeError, json.JSONDecodeError):
+                    stored_payload = None
+                if (
+                    existing["card_code"].upper() != card_code
+                    or existing["action"] != action
+                    or existing["user"] != user
+                    or existing["client"] != client
+                    or stored_payload != (payload or {})
+                ):
+                    raise ValueError("Idempotency anahtarı farklı içerikli bir istek için kullanılamaz.")
                 result = dict(existing)
                 result["payload"] = json.loads(result.pop("payload_json"))
                 result["duplicate"] = True
@@ -414,6 +484,7 @@ class EBSService:
             row["payload"] = json.loads(row.pop("payload_json"))
         return rows
 
+    @serialized_write
     def open_cash(self, actor: str, terminal: str) -> dict[str, Any]:
         correlation = str(uuid.uuid4())
         self.db.execute("BEGIN IMMEDIATE")
@@ -433,25 +504,41 @@ class EBSService:
             self.db.execute("ROLLBACK")
             raise
 
-    def _find_idempotent(self, key: str | None) -> dict[str, Any] | None:
+    def _find_idempotent(self, key: str | None, payload: dict[str, Any] | None = None, kind: str | None = None) -> dict[str, Any] | None:
         if not key:
             return None
         row = self.db.execute("SELECT * FROM transactions WHERE idempotency_key=?", (key,)).fetchone()
         if not row:
             return None
+        if kind and row["kind"] != kind:
+            raise ValueError("İdempotency anahtarı farklı bir işlem için zaten kullanılmış.")
+        if payload is not None:
+            try:
+                stored_payload = json.loads(row["payload_json"])
+            except (TypeError, json.JSONDecodeError):
+                stored_payload = None
+            # The header key is deliberately ignored: it is transport
+            # metadata and may or may not also be present in the JSON body.
+            def comparable(value: Any) -> Any:
+                if isinstance(value, dict):
+                    return {k: comparable(v) for k, v in value.items() if k != "idempotency_key"}
+                if isinstance(value, list):
+                    return [comparable(v) for v in value]
+                return value
+            if comparable(stored_payload) != comparable(payload):
+                raise ValueError("İdempotency anahtarı farklı içerikli bir istek için kullanılamaz.")
         result = dict(row)
         result["idempotent_replay"] = True
         result["balanced"] = self._balanced(result["id"])
         return result
 
+    @serialized_write
     def deposit(self, payload: dict[str, Any], actor: str, terminal: str, idempotency_key: str | None = None) -> dict[str, Any]:
         key = idempotency_key or payload.get("idempotency_key")
-        existing = self._find_idempotent(key)
+        existing = self._find_idempotent(key, payload, "CASH_DEPOSIT")
         if existing:
             return existing
-        amount = parse_money(payload.get("amount", payload.get("amount_minor", 0))) if "amount_minor" not in payload else int(payload["amount_minor"])
-        if amount <= 0:
-            raise ValueError("Tutar sıfırdan büyük olmalıdır.")
+        amount = parse_money(payload.get("amount", payload.get("amount_minor", 0))) if "amount_minor" not in payload else parse_minor(payload["amount_minor"])
         account_id = int(payload.get("account_id", 0))
         customer_id = int(payload.get("customer_id", 0))
         correlation = str(uuid.uuid4())
@@ -498,14 +585,13 @@ class EBSService:
             result["document"] = document
         return result
 
+    @serialized_write
     def transfer(self, payload: dict[str, Any], actor: str, terminal: str, idempotency_key: str | None = None) -> dict[str, Any]:
         key = idempotency_key or payload.get("idempotency_key")
-        existing = self._find_idempotent(key)
+        existing = self._find_idempotent(key, payload, str(payload.get("transfer_type", "HAVALE")))
         if existing:
             return existing
-        amount = parse_money(payload.get("amount", payload.get("amount_minor", 0))) if "amount_minor" not in payload else int(payload["amount_minor"])
-        if amount <= 0:
-            raise ValueError("Tutar sıfırdan büyük olmalıdır.")
+        amount = parse_money(payload.get("amount", payload.get("amount_minor", 0))) if "amount_minor" not in payload else parse_minor(payload["amount_minor"])
         source_id = int(payload.get("source_account_id", 0))
         target_id = int(payload.get("target_account_id", 0))
         if source_id == target_id:
@@ -553,6 +639,7 @@ class EBSService:
             raise ValueError("Jurnal dengesi sağlanamadı.")
         self._audit("TRANSFER_COMPLETE", "transaction", transaction_id, {"status": "PENDING_APPROVAL"}, {"status": "COMPLETED"}, actor, correlation, terminal)
 
+    @serialized_write
     def decide_work_item(self, work_item_id: int, decision: str, actor: str, terminal: str) -> dict[str, Any]:
         if decision not in {"approve", "reject"}:
             raise ValueError("Geçersiz onay kararı.")
