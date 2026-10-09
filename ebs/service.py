@@ -395,7 +395,7 @@ class EBSService:
         return customer
 
     def accounts(self, customer_id: int | None = None) -> list[dict[str, Any]]:
-        if customer_id:
+        if customer_id is not None:
             rows = self.db.execute("SELECT a.*, c.name AS customer_name FROM accounts a JOIN customers c ON c.id=a.customer_id WHERE customer_id=? ORDER BY a.id", (customer_id,)).fetchall()
         else:
             rows = self.db.execute("SELECT a.*, c.name AS customer_name FROM accounts a JOIN customers c ON c.id=a.customer_id ORDER BY a.id").fetchall()
