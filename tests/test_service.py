@@ -61,6 +61,7 @@ class EBSServiceTests(unittest.TestCase):
         staff = self.service.login("gise01", "1234")
         self.assertEqual(staff["role"], "PERSONEL")
         self.assertIn("write", staff["permissions"])
+        self.assertEqual(staff["user"]["username"], "gise01")
         self.assertEqual(self.service.current_user(staff["token"])["username"], "gise01")
 
         customer = self.service.login("Ahmet Karaca", "1234")

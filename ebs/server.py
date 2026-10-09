@@ -107,6 +107,11 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                 if user is not None:
                     return self._send_json(user)
                 return
+            if path == "/api/me":
+                user = self._user(required=True)
+                if user is not None:
+                    return self._send_json({"user": user, "permissions": ["read", "self_service"] if user["role"] == "CUSTOMER" else ["read", "write"]})
+                return
             if path == "/api/dashboard":
                 return self._send_json(self.ebs_server.service.dashboard())
             if path == "/api/manifest":
@@ -136,7 +141,9 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
                 if user["role"] != "CUSTOMER" or not user.get("customer_id"):
                     return self._error("Bu endpoint yalnız müşteri oturumu içindir.", HTTPStatus.FORBIDDEN)
                 result = self.ebs_server.service.customer_360(int(user["customer_id"]))
-                return self._send_json(result or {"error": "Müşteri bulunamadı."}, HTTPStatus.OK if result else HTTPStatus.NOT_FOUND)
+                if not result:
+                    return self._send_json({"error": "Müşteri bulunamadı."}, HTTPStatus.NOT_FOUND)
+                return self._send_json({"customer": {key: result[key] for key in ("id", "code", "name", "demo_identity", "segment", "phone", "email", "city", "status")}, **{key: result[key] for key in ("accounts", "cards", "loans", "policies", "claims")}})
             if path == "/api/customers":
                 return self._send_json(self.ebs_server.service.customers(query.get("q", [""])[0]))
             if path.startswith("/api/customers/") and path.endswith("/360"):
@@ -172,7 +179,10 @@ class EBSRequestHandler(BaseHTTPRequestHandler):
             if path == "/api/login":
                 username = str(body.get("username", ""))
                 password = str(body.get("password", ""))
-                return self._send_json(service.login(username, password))
+                try:
+                    return self._send_json(service.login(username, password))
+                except ValueError as exc:
+                    return self._error(str(exc), HTTPStatus.UNAUTHORIZED)
             if path == "/api/logout":
                 service.logout(self._token())
                 return self._send_json({"status": "signed_out"})

@@ -271,6 +271,16 @@ class EBSService:
         result = dict(row)
         result["token"] = token
         result["permissions"] = ["read", "write"] if row["role"] != "CUSTOMER" else ["read", "self_service"]
+        result["user"] = {
+            "id": row["id"],
+            "username": row["username"],
+            "display_name": row["display_name"],
+            "role": row["role"],
+            "department": row["department"],
+            "customer_id": row["customer_id"],
+            "active": row["active"],
+        }
+        result["config"] = {"branch_code": "1001", "branch_name": "EBS Eğitim Şubesi", "business_date": now()[:10]}
         return result
 
     def current_user(self, token: str | None) -> dict[str, Any] | None:
