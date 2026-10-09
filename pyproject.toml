@@ -1,0 +1,9 @@
+[project]
+name = "ebs-simulator"
+version = "0.1.0"
+description = "EBS banking and insurance training simulator core"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.unittest]
+start_dir = "tests"

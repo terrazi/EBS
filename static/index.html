@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EBS Bankacılık ve Sigortacılık Eğitim Simülasyonu</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="login-screen" class="login-screen">
+    <form id="login-form" class="login-card">
+      <div class="brand-mark login-mark">EBS</div>
+      <p class="eyebrow">MERKEZİ V3 SERVER · 8792</p>
+      <h1>EBS Eğitim Simülasyonu</h1>
+      <p class="muted">Rolünüze ait kullanıcı bilgileriyle giriş yapın.</p>
+      <label>Kullanıcı adı<input id="login-username" autocomplete="username" value="gise01" required></label>
+      <label>Şifre<input id="login-password" type="password" autocomplete="current-password" value="1234" required></label>
+      <button class="primary wide" type="submit">Giriş Yap</button>
+      <small class="muted">Demo personel: gise01 / 1234 · Admin: admin / EBS2026!</small>
+      <div id="login-error" class="login-error" hidden></div>
+    </form>
+  </div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">EBS</span><div><strong>EBS Bankacılık ve Sigortacılık Eğitim Simülasyonu</strong><small>Merkezi işlem motoru · v0.1 temel dikey dilim</small></div></div>
+    <div class="role-switch" aria-label="Görünüm rolü"><button class="role active" data-role="PERSONEL">Personel</button><button class="role admin" data-role="ADMIN">Admin</button><button class="role customer" data-role="CUSTOMER">Müşteri</button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="demo-badge">SCENARIO_DEMO · Eğitim verisi</div>
+      <nav>
+        <button class="nav-item active" data-view="dashboard">Genel Bakış</button>
+        <button class="nav-item" data-view="customers">Müşteri 360°</button>
+        <button class="nav-item" data-view="cash">Gişe / Kasa</button>
+        <button class="nav-item" data-view="transfer">Transfer</button>
+        <button class="nav-item" data-view="work">İş Havuzu</button>
+        <button class="nav-item" data-view="audit">Denetim Kaydı</button>
+      </nav>
+      <div class="sidebar-foot"><span class="status-dot"></span> Merkezi Server · 8792<br><small>Yerel eğitim ortamı</small></div>
+    </aside>
+    <main class="content">
+      <div id="flash" class="flash" hidden></div>
+      <section id="view-dashboard" class="view active">
+        <div class="page-heading"><div><p class="eyebrow">OPERASYON DASHBOARD</p><h1>Bugünkü çalışma alanı</h1><p>İşlem sonuçları merkezi kayıtlardan okunur; her parasal hareket jurnal ve denetim izi üretir.</p></div><button class="secondary" id="reset-demo">Demo Veriyi Sıfırla</button></div>
+        <div id="metrics" class="metric-grid"></div>
+        <div class="grid-two"><article class="card"><div class="card-head"><h2>Son işlemler</h2><button class="link" data-view="audit">Tümünü gör</button></div><div id="recent-transactions" class="table-wrap"></div></article><article class="card"><div class="card-head"><h2>Kasa durumu</h2><button id="open-cash-small" class="secondary">Kasa Aç</button></div><div id="cash-summary"></div></article></div>
+        <article class="card"><div class="card-head"><h2>Günün kampanyaları</h2><span class="muted">Müşteri Client için 15 temadan seçilir</span></div><div id="campaigns" class="campaign-grid"></div></article>
+      </section>
+
+      <section id="view-customers" class="view">
+        <div class="page-heading"><div><p class="eyebrow">MÜŞTERİ HİZMETLERİ</p><h1>Müşteri 360°</h1><p>Demo müşteri; hesap, kart, kredi, poliçe ve hasar geçmişiyle birlikte görünür.</p></div></div>
+        <div class="grid-two customer-layout"><article class="card"><div class="search-row"><label for="customer-search">Müşteri ara</label><input id="customer-search" placeholder="Ad, kod veya demo kimliği"><span id="customer-count" class="muted"></span></div><div id="customer-list" class="customer-list"></div></article><article class="card"><div id="customer-detail" class="empty">Detay için bir müşteri seçin.</div></article></div>
+      </section>
+
+      <section id="view-cash" class="view">
+        <div class="page-heading"><div><p class="eyebrow">GİŞE / KASA</p><h1>Nakit yatırma</h1><p>Önce açık kasayı ve hesabı doğrulayın. İşlem hesap, kasa, dengeli jurnal, audit ve dekontu birlikte günceller.</p></div></div>
+        <div class="grid-two"><article class="card form-card"><div id="cash-state"></div><button id="open-cash" class="primary wide">Kasayı Aç</button><form id="deposit-form" hidden><label>Müşteri<select id="deposit-customer" required></select></label><label>Hesap<select id="deposit-account" required></select></label><label>Tutar<input id="deposit-amount" inputmode="decimal" placeholder="10.000,00" required><small>Para birimi seçilen hesaptan alınır.</small></label><button class="primary wide" type="submit">Önizle ve yatır</button></form></article><article class="card"><h2>Akış kontrolü</h2><ol class="steps"><li class="done">Kasa durumu</li><li class="done">Müşteri ve hesap seçimi</li><li>Önizleme ve tutar kontrolü</li><li>Transaction + jurnal + audit</li><li>Dekont ve sonuç</li></ol><div id="deposit-result" class="result-box empty">İşlem sonucu burada görünür.</div></article></div>
+      </section>
+
+      <section id="view-transfer" class="view">
+        <div class="page-heading"><div><p class="eyebrow">PARA TRANSFERLERİ</p><h1>Havale / FAST</h1><p>Kaynak ve hedef hesaplar merkezî veriden seçilir. Aynı idempotency anahtarı ikinci kayıt oluşturmaz.</p></div></div>
+        <div class="grid-two"><article class="card form-card"><form id="transfer-form"><label>Kaynak hesap<select id="transfer-source" required></select></label><label>Hedef hesap<select id="transfer-target" required></select></label><label>Tutar<input id="transfer-amount" inputmode="decimal" placeholder="1.250,00" required></label><label>Transfer türü<select id="transfer-type"><option>HAVALE</option><option>FAST</option><option>EFT</option></select></label><button class="primary wide" type="submit">Önizle ve gönder</button></form></article><article class="card"><h2>Maker-checker</h2><p class="muted">5.000.000 kuruş üzerindeki transferler bakiye değiştirmeden bağımsız onay işine düşer.</p><div id="transfer-result" class="result-box empty">Transfer sonucu burada görünür.</div></article></div>
+      </section>
+
+      <section id="view-work" class="view"><div class="page-heading"><div><p class="eyebrow">MERKEZİ İŞ HAVUZU</p><h1>Bekleyen işler</h1><p>İşlemi başlatan kişi kendi onayını veremez; karar sonrası ilgili state değişir.</p></div></div><article class="card"><div id="work-list" class="work-list"></div></article></section>
+      <section id="view-audit" class="view"><div class="page-heading"><div><p class="eyebrow">DENETİM / JURNAL</p><h1>İşlem geçmişi</h1><p>Actor, correlation ID, terminal ve old → new durumları kaydedilir.</p></div></div><article class="card"><div id="audit-list" class="table-wrap"></div></article></section>
+    </main>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

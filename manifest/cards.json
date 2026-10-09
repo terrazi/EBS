@@ -1,0 +1,3302 @@
+{
+  "contract": "206 Ekran / Menü / İşlev Üretim Sözleşmesi",
+  "count": 206,
+  "cards": [
+    {
+      "code": "ADM-001",
+      "client": "ADMIN CLIENT",
+      "domain": "Admin ortak kabuk",
+      "title": "Admin Giriş",
+      "application_type": "shell_component",
+      "api": "/api/workflows/adm-001",
+      "tables": [
+        "adm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ADM-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ADM-002",
+      "client": "ADMIN CLIENT",
+      "domain": "Admin ortak kabuk",
+      "title": "Çalışma Alanı Seçimi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/adm-002",
+      "tables": [
+        "adm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ADM-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ADM-003",
+      "client": "ADMIN CLIENT",
+      "domain": "Admin ortak kabuk",
+      "title": "Global Üst Çubuk",
+      "application_type": "shell_component",
+      "api": "/api/workflows/adm-003",
+      "tables": [
+        "adm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ADM-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ADM-004",
+      "client": "ADMIN CLIENT",
+      "domain": "Admin ortak kabuk",
+      "title": "Global Arama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/adm-004",
+      "tables": [
+        "adm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ADM-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-001",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Yönetim Dashboard",
+      "application_type": "dashboard",
+      "api": "/api/workflows/abm-001",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-010",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Organizasyon Ağacı",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/abm-010",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-011",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Şube Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-011",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-012",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Departman Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-012",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-012 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-013",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Personel Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-013",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-013 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-014",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Rol & Yetki",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-014",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-014 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-015",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Vekâlet",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-015",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-015 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-016",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Yetki & Onay Matrisi",
+      "application_type": "decision",
+      "api": "/api/workflows/abm-016",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-016 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-020",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Ürün/Tarife Ana Sayfa",
+      "application_type": "dashboard",
+      "api": "/api/workflows/abm-020",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-020 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-021",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Mevduat Ürünleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-021",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-021 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-022",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kredi Ürünleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-022",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-022 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-023",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kart Ürünleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-023",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-023 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-024",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kur Tablosu",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/abm-024",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-024 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-025",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Transfer/Ücret Parametreleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-025",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-025 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-026",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Sigorta Ürün/Tarifeleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-026",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-026 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-027",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Belge Matrisi",
+      "application_type": "document",
+      "api": "/api/workflows/abm-027",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-027 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-030",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Merkezi İş Havuzu Yönetimi",
+      "application_type": "queue",
+      "api": "/api/workflows/abm-030",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-030 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-031",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Onay Havuzu",
+      "application_type": "queue",
+      "api": "/api/workflows/abm-031",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-031 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-032",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Operasyon İstisnaları",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/abm-032",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-032 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-040",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Gişe Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-040",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-040 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-041",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kredi Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-041",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-041 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-042",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kart Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-042",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-042 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-043",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Sigorta Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-043",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-043 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-044",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Hasar Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-044",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-044 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-050",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Mutabakat Merkezi",
+      "application_type": "decision",
+      "api": "/api/workflows/abm-050",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-050 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-060",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "İşletme Raporları",
+      "application_type": "report",
+      "api": "/api/workflows/abm-060",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-060 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-061",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Audit / Denetim Merkezi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/abm-061",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-061 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-062",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Ayarlar / Kurumsal Kimlik",
+      "application_type": "configuration",
+      "api": "/api/workflows/abm-062",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-062 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "ABM-063",
+      "client": "ADMIN CLIENT",
+      "domain": "Banka ve sigorta yönetimi",
+      "title": "Kullanıcı Kimliği / Şifre Yönetimi",
+      "application_type": "shell_component",
+      "api": "/api/workflows/abm-063",
+      "tables": [
+        "abm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "ABM-063 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-001",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Eğitim Dashboard",
+      "application_type": "dashboard",
+      "api": "/api/workflows/aes-001",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-010",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Senaryo Kataloğu",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-010",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-011",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Senaryo Tasarım Sihirbazı",
+      "application_type": "wizard",
+      "api": "/api/workflows/aes-011",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-012",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Öğrenci/Personel Atama",
+      "application_type": "configuration",
+      "api": "/api/workflows/aes-012",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-012 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-013",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Canlı Sınıf",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-013",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-013 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-014",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Sınav Modu",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-014",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-014 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-015",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Değerlendirme",
+      "application_type": "decision",
+      "api": "/api/workflows/aes-015",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-015 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-016",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Snapshot Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/aes-016",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-016 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-017",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Demo Veri Sıfırlama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-017",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-017 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-020",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Sistem Sağlığı",
+      "application_type": "dashboard",
+      "api": "/api/workflows/aes-020",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-020 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-021",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Client & Ağ Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/aes-021",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-021 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-022",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Server/Port Durumu",
+      "application_type": "dashboard",
+      "api": "/api/workflows/aes-022",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-022 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-023",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Yedekleme",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-023",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-023 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-024",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Geri Yükleme",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-024",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-024 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-025",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Sürüm & Migration",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-025",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-025 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-026",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Sistem Olayları",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-026",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-026 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-027",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Tanılama Paketi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-027",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-027 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-028",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Kurulum Sağlık Geçmişi",
+      "application_type": "timeline",
+      "api": "/api/workflows/aes-028",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-028 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-018",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Senaryo / Görev Toplu Atama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-018",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-018 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-019",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Senaryo Müşteri Havuzu",
+      "application_type": "queue",
+      "api": "/api/workflows/aes-019",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-019 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-029",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "İç Mesaj & Görev Merkezi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/aes-029",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-029 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-030",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Mesaj Şablonları",
+      "application_type": "document",
+      "api": "/api/workflows/aes-030",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-030 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-031",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Mesaj Kullanıcı Grupları",
+      "application_type": "configuration",
+      "api": "/api/workflows/aes-031",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-031 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-032",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Mesaj Arşivi",
+      "application_type": "queue",
+      "api": "/api/workflows/aes-032",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-032 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-033",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Erişim / Terminal Kontrol",
+      "application_type": "configuration",
+      "api": "/api/workflows/aes-033",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-033 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "AES-034",
+      "client": "ADMIN CLIENT",
+      "domain": "Eğitmen ve sistem yönetimi",
+      "title": "Rol Bazlı Yardım / Kullanım Rehberi",
+      "application_type": "help",
+      "api": "/api/workflows/aes-034",
+      "tables": [
+        "aes",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "admin_client:use",
+      "acceptance_test": "AES-034 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Personel Giriş",
+      "application_type": "shell_component",
+      "api": "/api/workflows/per-001",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Operasyon Dashboard",
+      "application_type": "dashboard",
+      "api": "/api/workflows/per-002",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Global Arama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/per-003",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Bekleyen İşler / İş Listem",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/per-004",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Müşteri 360°",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/per-005",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "İşlem Geçmişi Timeline",
+      "application_type": "timeline",
+      "api": "/api/workflows/per-006",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Mesajlarım / Görevlerim",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/per-007",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Yetkilerim",
+      "application_type": "configuration",
+      "api": "/api/workflows/per-008",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Ekran Temam / Görünüm",
+      "application_type": "shell_component",
+      "api": "/api/workflows/per-009",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Rol Bazlı Yardım",
+      "application_type": "help",
+      "api": "/api/workflows/per-010",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PER-011",
+      "client": "PERSONEL CLIENT",
+      "domain": "Personel ortak",
+      "title": "Müşteri Talepleri Kaynak Görünümü",
+      "application_type": "queue",
+      "api": "/api/workflows/per-011",
+      "tables": [
+        "per",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PER-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Müşteri Arama & Sonuç",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cs-001",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Yeni Müşteri Sihirbazı",
+      "application_type": "wizard",
+      "api": "/api/workflows/cs-002",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "KYC / Kimlik Doğrulama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cs-003",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Risk & Uyum Özeti",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cs-004",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Müşteri Profil Değişikliği",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cs-005",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Hesap Açılışı",
+      "application_type": "wizard",
+      "api": "/api/workflows/cs-006",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Kart Başvurusu Başlat",
+      "application_type": "wizard",
+      "api": "/api/workflows/cs-007",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Kredi Başvurusu Başlat",
+      "application_type": "wizard",
+      "api": "/api/workflows/cs-008",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Sigorta Teklifine Yönlendir",
+      "application_type": "wizard",
+      "api": "/api/workflows/cs-009",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Destek Talepleri",
+      "application_type": "queue",
+      "api": "/api/workflows/cs-010",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CS-011",
+      "client": "PERSONEL CLIENT",
+      "domain": "Müşteri hizmetleri",
+      "title": "Müşteri Belgeleri",
+      "application_type": "document",
+      "api": "/api/workflows/cs-011",
+      "tables": [
+        "cs",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "CS-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Kasa Açılışı",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/tl-001",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Nakit Yatırma",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/tl-002",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Nakit Çekme",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/tl-003",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Kasa Transferi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/tl-004",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Döviz/Altın Gişe",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/tl-005",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Kasa Durumu",
+      "application_type": "dashboard",
+      "api": "/api/workflows/tl-006",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Kasa Kapanışı",
+      "application_type": "decision",
+      "api": "/api/workflows/tl-007",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "TL-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Gişe ve kasa",
+      "title": "Kasa Farkı İnceleme",
+      "application_type": "decision",
+      "api": "/api/workflows/tl-008",
+      "tables": [
+        "tl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "TL-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Transfer Başlat",
+      "application_type": "wizard",
+      "api": "/api/workflows/pm-001",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Alıcı Doğrulama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pm-002",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Transfer Özeti",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pm-003",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Transfer Sonuç",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pm-004",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Transfer İade/Geri Çağırma",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pm-005",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Kolay Adres Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/pm-006",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PM-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Para transferleri",
+      "title": "Ödeme İste",
+      "application_type": "wizard",
+      "api": "/api/workflows/pm-007",
+      "tables": [
+        "pm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PM-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PAY-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ödemeler",
+      "title": "Fatura Borç Sorgu",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pay-001",
+      "tables": [
+        "pay",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PAY-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PAY-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ödemeler",
+      "title": "Fatura/Tahakkuk Seçimi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pay-002",
+      "tables": [
+        "pay",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PAY-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PAY-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ödemeler",
+      "title": "Fatura Ödeme Özeti",
+      "application_type": "wizard",
+      "api": "/api/workflows/pay-003",
+      "tables": [
+        "pay",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PAY-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PAY-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ödemeler",
+      "title": "Otomatik Ödeme Talimatı",
+      "application_type": "wizard",
+      "api": "/api/workflows/pay-004",
+      "tables": [
+        "pay",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PAY-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "PAY-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ödemeler",
+      "title": "Talimat İzleme",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/pay-005",
+      "tables": [
+        "pay",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "PAY-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Kur Panosu",
+      "application_type": "dashboard",
+      "api": "/api/workflows/fx-001",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Döviz Al",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/fx-002",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Döviz Sat",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/fx-003",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Altın Al",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/fx-004",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Altın Sat",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/fx-005",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "FX-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Döviz ve altın",
+      "title": "Çapraz Kur",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/fx-006",
+      "tables": [
+        "fx",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "FX-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Başvuru Kuyruğu",
+      "application_type": "queue",
+      "api": "/api/workflows/ln-001",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Başvuru Detayı",
+      "application_type": "timeline",
+      "api": "/api/workflows/ln-002",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Finansal Değerlendirme",
+      "application_type": "decision",
+      "api": "/api/workflows/ln-003",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Belge/Tahsis Kontrol",
+      "application_type": "decision",
+      "api": "/api/workflows/ln-004",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Tahsis Önerisi",
+      "application_type": "decision",
+      "api": "/api/workflows/ln-005",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Onay Kararı",
+      "application_type": "decision",
+      "api": "/api/workflows/ln-006",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Sözleşme & Belge",
+      "application_type": "document",
+      "api": "/api/workflows/ln-007",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Kullandırım",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/ln-008",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/ln-009",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Ödeme Planı",
+      "application_type": "wizard",
+      "api": "/api/workflows/ln-010",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-011",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Kredi Taksit Ödeme",
+      "application_type": "wizard",
+      "api": "/api/workflows/ln-011",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-012",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Erken Kapama Teklifi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/ln-012",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-012 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-013",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Ara Ödeme",
+      "application_type": "wizard",
+      "api": "/api/workflows/ln-013",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-013 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-014",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Yapılandırma",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/ln-014",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-014 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "LN-015",
+      "client": "PERSONEL CLIENT",
+      "domain": "Krediler",
+      "title": "Gecikmiş Krediler",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/ln-015",
+      "tables": [
+        "ln",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "LN-015 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Başvuru Kuyruğu",
+      "application_type": "queue",
+      "api": "/api/workflows/cd-001",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Banka Kartı Başvuru",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cd-002",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kredi Kartı Değerlendirme",
+      "application_type": "decision",
+      "api": "/api/workflows/cd-003",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Limit Kararı",
+      "application_type": "decision",
+      "api": "/api/workflows/cd-004",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Üretim / Aktivasyon",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cd-005",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/cd-006",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Servis Merkezi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cd-007",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Kanal Ayarları",
+      "application_type": "configuration",
+      "api": "/api/workflows/cd-008",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Ekstre Detayı",
+      "application_type": "timeline",
+      "api": "/api/workflows/cd-009",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CD-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Kart operasyonları",
+      "title": "Kart Borcu Ödeme",
+      "application_type": "wizard",
+      "api": "/api/workflows/cd-010",
+      "tables": [
+        "cd",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CD-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Sigorta Teklif Kuyruğu",
+      "application_type": "queue",
+      "api": "/api/workflows/in-001",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Teklif Başlat",
+      "application_type": "wizard",
+      "api": "/api/workflows/in-002",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Teminat Seçimi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-003",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Teklif Özeti",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-004",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Bilgilendirme / Onay",
+      "application_type": "decision",
+      "api": "/api/workflows/in-005",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Prim Tahsilatı",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-006",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Poliçe Oluştur",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-007",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Poliçe Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/in-008",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Zeyilname",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-009",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Yenileme",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-010",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-011",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "İptal / Fesih",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-011",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-012",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Teminat/Limit/Muafiyet Değişikliği",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-012",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-012 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-013",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Poliçe Tarafları",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-013",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-013 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "IN-014",
+      "client": "PERSONEL CLIENT",
+      "domain": "Sigorta",
+      "title": "Prim/Taksit Takibi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/in-014",
+      "tables": [
+        "in",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "IN-014 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar İhbar Kuyruğu",
+      "application_type": "queue",
+      "api": "/api/workflows/cl-001",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar İhbarı",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cl-002",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar Belge Merkezi",
+      "application_type": "document",
+      "api": "/api/workflows/cl-003",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Eksper Atama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cl-004",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "İnceleme & Rezerv",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cl-005",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar Kararı",
+      "application_type": "decision",
+      "api": "/api/workflows/cl-006",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-007",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar Onayı",
+      "application_type": "decision",
+      "api": "/api/workflows/cl-007",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-008",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar Ödeme",
+      "application_type": "wizard",
+      "api": "/api/workflows/cl-008",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-009",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Hasar Detay Timeline",
+      "application_type": "timeline",
+      "api": "/api/workflows/cl-009",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CL-010",
+      "client": "PERSONEL CLIENT",
+      "domain": "Hasar",
+      "title": "Kapanan/Reddedilen Hasarlar",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cl-010",
+      "tables": [
+        "cl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CL-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Ticari Müşteri Arama",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cm-001",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Ticari Müşteri/KYC",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cm-002",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Çek/Senet Portföyü",
+      "application_type": "queue",
+      "api": "/api/workflows/cm-003",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Çek/Senet Servis",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cm-004",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-005",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Teminat Yönetimi",
+      "application_type": "configuration",
+      "api": "/api/workflows/cm-005",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CM-006",
+      "client": "PERSONEL CLIENT",
+      "domain": "Ticari bankacılık",
+      "title": "Ticari Kredi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cm-006",
+      "tables": [
+        "cm",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CM-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "DOC-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Belge operasyonu",
+      "title": "Belge Merkezi",
+      "application_type": "document",
+      "api": "/api/workflows/doc-001",
+      "tables": [
+        "doc",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "DOC-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "DOC-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Belge operasyonu",
+      "title": "Şablondan Belge Oluştur",
+      "application_type": "document",
+      "api": "/api/workflows/doc-002",
+      "tables": [
+        "doc",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "DOC-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "DOC-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Belge operasyonu",
+      "title": "Eksik Belge Kuyruğu",
+      "application_type": "queue",
+      "api": "/api/workflows/doc-003",
+      "tables": [
+        "doc",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "DOC-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "DOC-004",
+      "client": "PERSONEL CLIENT",
+      "domain": "Belge operasyonu",
+      "title": "Belge İnceleme",
+      "application_type": "document",
+      "api": "/api/workflows/doc-004",
+      "tables": [
+        "doc",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "personel_client:use",
+      "acceptance_test": "DOC-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CTL-001",
+      "client": "PERSONEL CLIENT",
+      "domain": "Onay ve kontrol",
+      "title": "Operasyon Onay Havuzu",
+      "application_type": "queue",
+      "api": "/api/workflows/ctl-001",
+      "tables": [
+        "ctl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CTL-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CTL-002",
+      "client": "PERSONEL CLIENT",
+      "domain": "Onay ve kontrol",
+      "title": "Mutabakat Farkları",
+      "application_type": "decision",
+      "api": "/api/workflows/ctl-002",
+      "tables": [
+        "ctl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CTL-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CTL-003",
+      "client": "PERSONEL CLIENT",
+      "domain": "Onay ve kontrol",
+      "title": "Yetki Aşımı İşleri",
+      "application_type": "configuration",
+      "api": "/api/workflows/ctl-003",
+      "tables": [
+        "ctl",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "personel_client:use",
+      "acceptance_test": "CTL-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-001",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Müşteri Giriş",
+      "application_type": "shell_component",
+      "api": "/api/workflows/cus-001",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-002",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Ana Sayfa",
+      "application_type": "dashboard",
+      "api": "/api/workflows/cus-002",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-003",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hesaplarım",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-003",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-003 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-004",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hesap Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/cus-004",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-004 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-005",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hesap Açılış Talebi",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-005",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-005 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-006",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Para Gönder Sihirbazı",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-006",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-006 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-007",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Transferlerim",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-007",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-007 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-008",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Ödemeler",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-008",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-008 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-009",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Döviz & Altın",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-009",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-009 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-010",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kartlarım",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-010",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-010 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-011",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kart Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/cus-011",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-011 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-012",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kart Servis Talepleri",
+      "application_type": "queue",
+      "api": "/api/workflows/cus-012",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-012 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-013",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kredilerim",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-013",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-013 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-014",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kredi Başvurusu",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-014",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-014 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-015",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kredi Servis",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-015",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-015 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-016",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Poliçelerim",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-016",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-016 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-017",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Poliçe Detay",
+      "application_type": "timeline",
+      "api": "/api/workflows/cus-017",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-017 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-018",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Sigorta Teklifi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-018",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-018 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-019",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Zeyil/Yenile/İptal Talebi",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-019",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-019 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-020",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hasar Bildir",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-020",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-020 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-021",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hasar Dosyam",
+      "application_type": "timeline",
+      "api": "/api/workflows/cus-021",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-021 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-022",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Belgelerim",
+      "application_type": "document",
+      "api": "/api/workflows/cus-022",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": "Eğitim işlem belgesi",
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-022 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-023",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Destek Taleplerim",
+      "application_type": "queue",
+      "api": "/api/workflows/cus-023",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-023 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-024",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Bildirim Merkezi",
+      "application_type": "timeline",
+      "api": "/api/workflows/cus-024",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-024 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-025",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Profil & Talepler",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-025",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-025 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-026",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Güvenlik / Oturum",
+      "application_type": "shell_component",
+      "api": "/api/workflows/cus-026",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-026 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-027",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "ATM / Nakit Eğitim Kanalı",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-027",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-027 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-028",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hesap Kapatma Talebi",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-028",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-028 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-029",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Kolay Adreslerim",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-029",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-029 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-030",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Ödeme İste",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-030",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-030 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-031",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Otomatik Ödeme Talimatlarım",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-031",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-031 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-032",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Poliçe Prim / Taksit Ödeme",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-032",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-032 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-033",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Sigorta Asistans / Bilgi",
+      "application_type": "workflow_step",
+      "api": "/api/workflows/cus-033",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-033 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-034",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Hasar Takip Talebi",
+      "application_type": "wizard",
+      "api": "/api/workflows/cus-034",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-034 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "CUS-035",
+      "client": "MÜŞTERİ CLIENT",
+      "domain": "Müşteri portalı",
+      "title": "Görünüm / Ekran Teması",
+      "application_type": "shell_component",
+      "api": "/api/workflows/cus-035",
+      "tables": [
+        "cus",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "müşteri̇_client:use",
+      "acceptance_test": "CUS-035 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "COM-001",
+      "client": "ORTAK",
+      "domain": "Ortak",
+      "title": "Yardım",
+      "application_type": "help",
+      "api": "/api/workflows/com-001",
+      "tables": [
+        "com",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "ortak:use",
+      "acceptance_test": "COM-001 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    },
+    {
+      "code": "COM-002",
+      "client": "ORTAK",
+      "domain": "Ortak",
+      "title": "Yazılım Hakkında",
+      "application_type": "help",
+      "api": "/api/workflows/com-002",
+      "tables": [
+        "com",
+        "audit_log"
+      ],
+      "document": null,
+      "permission": "ortak:use",
+      "acceptance_test": "COM-002 happy path ve negatif state kontrolü",
+      "status": "foundation-mapped"
+    }
+  ]
+}
