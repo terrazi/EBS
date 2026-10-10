@@ -23,6 +23,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"ebs-v3-service/internal/sim"
 )
 
 // v3 UI is hosted centrally by the Server service. Browser clients never need to
@@ -541,6 +543,14 @@ func discoveryResponder(stop <-chan struct{}) {
 func newHTTPServer(stop <-chan struct{}) *http.Server {
 	store := newStore()
 	v3mux := v3APIMux(store)
+	// The durable simulator engine is initialized once for the central service.
+	// The preserved v3 event API remains mounted for compatibility, while new
+	// clients use the authenticated transactional /v3api/api/v3 endpoints.
+	if engine, err := sim.Open(filepath.Join(programData(), "ebs-v31.sqlite3")); err != nil {
+		log.Printf("v3 simulation engine unavailable: %v", err)
+	} else {
+		installSimulationAPI(v3mux, engine)
+	}
 	legacy := legacyProxy()
 	webFS, _ := fs.Sub(embedded, "web")
 	files := http.FileServer(http.FS(webFS))

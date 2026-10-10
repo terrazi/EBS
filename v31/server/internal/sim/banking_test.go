@@ -3,6 +3,7 @@ package sim
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"path/filepath"
 	"sync"
@@ -240,5 +241,59 @@ func TestQueriesUnknownResourceAndCustomerSummary(t *testing.T) {
 	}
 	if b, err := json.Marshal(summary); err != nil || len(b) == 0 {
 		t.Fatal("summary was not serializable")
+	}
+}
+
+func TestBankingProductFlowsPersistStateAndJournal(t *testing.T) {
+	e := testEngine(t)
+	customer := User{ID: 10, Username: "Ahmet Karaca", Role: "CUSTOMER", CustomerID: 1, Permissions: []string{"self_service"}}
+	var tryAccount, usdAccount, recipient int64
+	if err := e.DB.QueryRow("SELECT id FROM accounts WHERE customer_id=1 AND currency='TRY' ORDER BY id LIMIT 1").Scan(&tryAccount); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.DB.QueryRow("SELECT id FROM accounts WHERE customer_id=1 AND currency='USD' ORDER BY id LIMIT 1").Scan(&usdAccount); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.DB.QueryRow("SELECT id FROM accounts WHERE customer_id=2 AND currency='TRY' ORDER BY id LIMIT 1").Scan(&recipient); err != nil {
+		t.Fatal(err)
+	}
+	opened := applyBanking(t, e, customer, "banking.account_open", Payload{"currency": "EUR", "account_type": "Birikim"})
+	if opened["status"] != "COMPLETED" {
+		t.Fatalf("account open result: %#v", opened)
+	}
+	term := applyBanking(t, e, customer, "banking.term_deposit", Payload{"source_account_id": tryAccount, "amount_minor": "1000", "days": "30", "_reference": "TEST-TERM-1"})
+	if term["status"] != "COMPLETED" {
+		t.Fatalf("term deposit result: %#v", term)
+	}
+	payment := applyBanking(t, e, customer, "banking.bill_pay", Payload{"account_id": tryAccount, "amount_minor": "1000", "institution": "Elektrik", "_reference": "TEST-BILL-1"})
+	if payment["status"] != "COMPLETED" {
+		t.Fatalf("bill payment result: %#v", payment)
+	}
+	autopay := applyBanking(t, e, customer, "banking.autopay_create", Payload{"account_id": tryAccount, "amount_minor": "1000", "institution": "Su", "due_day": "15"})
+	applyBanking(t, e, customer, "banking.autopay_cancel", Payload{"autopay_id": fmt.Sprint(autopay["autopay_id"])})
+	applyBanking(t, e, customer, "banking.easy_address_create", Payload{"account_id": tryAccount, "address": "ahmet@example.invalid"})
+	request := applyBanking(t, e, customer, "banking.payment_request", Payload{"requester_account_id": tryAccount, "payer_account_id": recipient, "amount_minor": "1000", "note": "Test talep", "_reference": "TEST-REQ-1"})
+	if request["status"] != "PENDING" {
+		t.Fatalf("request result: %#v", request)
+	}
+	fx := applyBanking(t, e, customer, "banking.fx_trade", Payload{"source_account_id": usdAccount, "target_account_id": tryAccount, "amount_minor": "100", "_reference": "TEST-FX-1"})
+	if fx["status"] != "COMPLETED" || fx["target_amount_minor"].(int64) <= 0 {
+		t.Fatalf("fx result: %#v", fx)
+	}
+	staff := User{ID: 2, Username: "gise02", Role: "PERSONEL", Department: "Gişe / Kasa", Permissions: []string{"banking"}}
+	transfer := applyBanking(t, e, staff, "banking.transfer", Payload{"source_account_id": tryAccount, "target_account_id": recipient, "amount_minor": "1000", "_reference": "TEST-TRF-1"})
+	if transfer["status"] != "COMPLETED" {
+		t.Fatalf("transfer result: %#v", transfer)
+	}
+	recall := applyBanking(t, e, staff, "banking.transfer_recall", Payload{"reference": "TEST-TRF-1"})
+	if recall["status"] != "RECALLED" {
+		t.Fatalf("recall result: %#v", recall)
+	}
+	var journalRows int
+	if err := e.DB.QueryRow("SELECT COUNT(*) FROM ledger_entries WHERE reference LIKE 'TEST-%'").Scan(&journalRows); err != nil {
+		t.Fatal(err)
+	}
+	if journalRows < 10 {
+		t.Fatalf("expected journals for product flows, got %d", journalRows)
 	}
 }
