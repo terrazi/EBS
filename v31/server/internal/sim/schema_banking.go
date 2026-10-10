@@ -224,7 +224,7 @@ func seedBanking(tx *sql.Tx) error {
 	}
 	staff := []struct {
 		username, display, role, department string
-		permissions                           []string
+		permissions                         []string
 	}{
 		{"admin", "Sistem Yöneticisi / Eğitmen", "ADMIN", "Sistem Yönetimi", []string{"*"}},
 		{"gise01", "Gişe Yetkilisi 1", "PERSONEL", "Gişe / Kasa", []string{"banking"}},

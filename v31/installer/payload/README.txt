@@ -1,0 +1,1 @@
+Dağıtım derlemesinde TAM_KURULUM_DERLEME_NOTU.txt dosyasındaki payload burada hazırlanır.

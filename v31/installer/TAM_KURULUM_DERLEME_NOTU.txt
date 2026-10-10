@@ -1,0 +1,24 @@
+EBS v3.1 STABLE — TAM KURULUM DERLEME NOTU
+===========================================
+
+Yeni kurulum mimarisi Base_Setup.exe zincirine bağlı değildir.
+Personel ve Müşteri kurucuları yalnız ilgili Client'ı kurar.
+Admin kurucusu Server + Admin + Personel + Müşteri bileşenlerini kurar.
+
+Admin payload:
+- EBS_Admin.exe
+- EBS_Personel.exe
+- EBS_Musteri.exe
+- EBS_v3_Service.exe
+- EBS_Core_Server.exe (yalnız legacy/uyumluluk için; giriş için zorunlu değil)
+- EBS_Admin.ico / EBS_Personel.ico / EBS_Musteri.ico / EBS_Server.ico
+- GIRIS_BILGILERI.txt
+
+Personel/Müşteri kurucuları aynı kaynakla rol build değişkeni üzerinden üretilir.
+
+Örnek:
+GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -H=windowsgui -X main.installerRole=admin"
+
+Kritik ilke:
+Merkezi v3 Server 8792, login ve temel v3 API'lerin ana motorudur. Eski 8787 Core Server
+çalışmasa bile ana giriş ve v3 ekranlar çalışır.
