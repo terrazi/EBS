@@ -772,6 +772,7 @@ func queryRows(db *sql.DB, query string, args ...any) (any, error) {
 // tells the root router whether this resource belongs to the banking vertical.
 func (e *Engine) BankingQuery(u User, resource string, q url.Values) (any, bool, error) {
 	resource = strings.ToLower(strings.Trim(strings.TrimSpace(resource), "/"))
+	resource = strings.ReplaceAll(resource, "_", "-")
 	known := map[string]bool{
 		"customers": true, "accounts": true, "cash": true, "transfers": true,
 		"payments": true, "autopays": true, "easy-addresses": true,
