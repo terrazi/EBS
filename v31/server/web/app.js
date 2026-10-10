@@ -217,6 +217,27 @@ function fieldInput(label,i){label=capTR(label);const l=label.toLocaleLowerCase(
 function spec(label,text){return `<div class="spec"><span>${esc(label)}</span><p>${esc(text||'—')}</p></div>`}
 function infoFields(fields){if(!fields.length)return '<div class="empty compact">Bu ekran için ayrıca kullanıcı girişi gerekmiyor.</div>';return `<div class="info-chips">${fields.map(f=>`<span>${esc(capTR(f))}</span>`).join('')}</div>`}
 function taskActions(c,acts){if(!acts.length)return '';return `<div class="task-actions">${acts.map(a=>`<div class="task-action"><b>${esc(actionText(a))}</b><span>İşlem merkezi v3 çalışma alanı üzerinden yürütülür.</span></div>`).join('')}</div>`}
+const operationFields={
+ 'TL-002':[['account_id','Hesap ID','number'],['amount_minor','Tutar (kuruş)','number'],['description','Açıklama','text']],
+ 'TL-003':[['account_id','Hesap ID','number'],['amount_minor','Tutar (kuruş)','number'],['description','Açıklama','text']],
+ 'PM-001':[['source_account_id','Kaynak hesap ID','number'],['target_account_id','Hedef hesap ID','number'],['amount_minor','Tutar (kuruş)','number'],['transfer_type','Transfer türü','text']],
+ 'PM-005':[['reference','Orijinal referans','text'],['reason','Geri çağırma nedeni','text']],
+ 'PAY-003':[['account_id','Hesap ID','number'],['institution','Kurum','text'],['amount_minor','Tutar (kuruş)','number']],
+ 'PAY-004':[['account_id','Hesap ID','number'],['institution','Kurum','text'],['upper_limit_minor','Üst limit (kuruş)','number']],
+ 'FX-002':[['source_account_id','TRY kaynak hesap ID','number'],['target_account_id','Döviz hesap ID','number'],['amount_minor','Döviz miktarı alt birimi','number'],['rate','Satış kuru','text']],
+ 'FX-003':[['source_account_id','Döviz kaynak hesap ID','number'],['target_account_id','TRY hedef hesap ID','number'],['amount_minor','Döviz miktarı alt birimi','number'],['rate','Alış kuru','text']],
+ 'IN-002':[['customer_id','Müşteri ID','number'],['product','Sigorta ürünü','text'],['premium_minor','Prim (kuruş)','number']],
+ 'IN-007':[['quote_id','Teklif ID','number']],
+ 'LN-001':[['customer_id','Müşteri ID','number'],['product','Kredi ürünü','text'],['principal_minor','Anapara (kuruş)','number']],
+ 'CD-001':[['customer_id','Müşteri ID','number'],['card_type','Kart türü','text']],
+ 'CD-005':[['card_id','Kart ID','number']],
+ 'CUS-006':[['source_account_id','Kaynak hesap ID','number'],['target_account_id','Hedef hesap ID','number'],['amount_minor','Tutar (kuruş)','number'],['transfer_type','Transfer türü','text']],
+ 'CUS-008':[['account_id','Hesap ID','number'],['institution','Kurum','text'],['amount_minor','Tutar (kuruş)','number']],
+ 'CUS-029':[['account_id','Bağlı hesap ID','number'],['alias_type','Kolay adres türü','text'],['alias_value','Telefon/e-posta/TCKN','text']],
+ 'CUS-030':[['payer_customer_id','Gönderen müşteri ID','number'],['amount_minor','Tutar (kuruş)','number'],['due_at','Son tarih','date']],
+ 'CUS-031':[['account_id','Kaynak hesap ID','number'],['institution','Kurum','text'],['upper_limit_minor','Üst limit (kuruş)','number']]
+};
+function operationForm(code){const fields=operationFields[code]||[];if(!fields.length)return '';return `<form id="cardForm" class="form-grid operation-form" onsubmit="return false">${fields.map(([n,l,t])=>`<label class="field"><span>${esc(l)}</span><input name="${esc(n)}" type="${t}" ${t==='number'?'step="1"':''} required></label>`).join('')}</form>`}
 async function renderCard(c){
   setTitle(c.module,titleOf(c));
   $('#contextText').textContent=friendlyPurpose(c);
@@ -234,7 +255,7 @@ async function renderCard(c){
   const primary=acts[0]?`<button class="btn primary xl" onclick="EBS.cardAction('${c.code}','${esc(acts[0])}',false)">${esc(actionText(acts[0]))}</button>`:`<button class="btn primary xl" onclick="EBS.cardAction('${c.code}','Kayıtları görüntüle',false)">${actionLabel}</button>`;
   const adminTech=S.runtime.client==='admin'?`<details class="tech-details"><summary>Teknik ve Denetim Bilgileri</summary><div class="card"><div class="card-body"><div class="spec-grid">${spec('Kart / İşlev Kodu',c.code)}${spec('Giriş Koşulları',c.conditions)}${spec('Server / API',c.api)}${spec('İş Akışı',c.workflow)}${spec('Finansal Etki / Jurnal',c.financial)}${spec('Belge Etkisi',c.document)}${spec('Denetim / Bildirim',c.audit)}${spec('Kabul Testi',c.acceptance)}</div></div></div></details>`:'';
   root.innerHTML=`<div class="page-head"><div><h3>${esc(titleOf(c))}</h3><p>${esc(friendlyPurpose(c))}</p></div><div class="actions">${primary}<button class="btn outline" onclick="EBS.go('home')">Ana Çalışma Alanı</button></div></div>
-  <div class="grid cols-2"><div class="card"><div class="card-head"><h4>İşlem Akışı</h4></div><div class="card-body"><p class="lead-note">Bu ekranda yalnız işlem için gerekli bilgiler gösterilir. Teknik alanlar kullanıcıdan gizlenmiştir.</p>${acts.length?`<div class="task-actions">${acts.map((a,i)=>`<div class="task-action"><b>${i+1}. ${esc(actionText(a))}</b><span>${i===0?'İşleme bu adımdan başlayın.':'Önceki adım tamamlandığında kullanılır.'}</span></div>`).join('')}</div>`:'<div class="empty compact">Bu ekran bilgi görüntüleme amaçlıdır.</div>'}${safeFields.length?`<div class="section-title compact"><h4>İşlemde Kullanılan Bilgiler</h4></div><div class="info-chips">${safeFields.map(f=>`<span>${esc(capTR(f))}</span>`).join('')}</div>`:''}</div></div>
+  <div class="grid cols-2"><div class="card"><div class="card-head"><h4>İşlem Akışı</h4></div><div class="card-body"><p class="lead-note">Bu ekranda yalnız işlem için gerekli bilgiler gösterilir. Teknik alanlar kullanıcıdan gizlenmiştir.</p>${acts.length?`<div class="task-actions">${acts.map((a,i)=>`<div class="task-action"><b>${i+1}. ${esc(actionText(a))}</b><span>${i===0?'İşleme bu adımdan başlayın.':'Önceki adım tamamlandığında kullanılır.'}</span></div>`).join('')}</div>`:'<div class="empty compact">Bu ekran bilgi görüntüleme amaçlıdır.</div>'}${safeFields.length?`<div class="section-title compact"><h4>İşlemde Kullanılan Bilgiler</h4></div><div class="info-chips">${safeFields.map(f=>`<span>${esc(capTR(f))}</span>`).join('')}</div>`:''}${operationForm(c.code)}</div></div>
   <div class="card"><div class="card-head"><h4>Güncel Kayıtlar</h4><span class="status ${live?'success':'info'}">${live?'Merkezi Sistem':'İşlem Ekranı'}</span></div><div class="card-body">${renderLive(live)}</div></div></div>${adminTech}<div id="cardHistory"></div>`;
   loadCardHistory(c.code);
 }
