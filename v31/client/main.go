@@ -1,9 +1,10 @@
+//go:build windows
+
 package main
 
 import (
 	"encoding/json"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -116,19 +117,6 @@ func deriveV3(raw string) string {
 	return "http://" + net.JoinHostPort(host, "8792")
 }
 
-func healthOK(base string) bool {
-	if base == "" {
-		return false
-	}
-	c := &http.Client{Timeout: 1300 * time.Millisecond}
-	resp, err := c.Get(trimURL(base) + "/health")
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
-	return resp.StatusCode >= 200 && resp.StatusCode < 300
-}
-
 func waitHealth(base string, d time.Duration) bool {
 	deadline := time.Now().Add(d)
 	for time.Now().Before(deadline) {
@@ -194,6 +182,12 @@ func ensureAdminServices() {
 	_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
 	local := "http://localhost:8792"
 	if !waitHealth(local, 2500*time.Millisecond) {
+		// A listener that failed protocol/build/readiness checks must not be
+		// mistaken for the current server, or receive another console process.
+		if c, err := net.DialTimeout("tcp", "localhost:8792", 400*time.Millisecond); err == nil {
+			_ = c.Close()
+			return
+		}
 		srv := filepath.Join(installRoot(), "Server")
 		p := filepath.Join(srv, "EBS_v3_Service.exe")
 		if _, err := os.Stat(p); err == nil {
@@ -266,7 +260,11 @@ func promptServerAddress() string {
 		return candidate
 	}
 	if candidate != "" {
-		messageBox(fullName+" — Server Bağlantısı", "Girilen Server adresine ulaşılamadı:\n"+candidate+"\n\nServer bilgisayarında Admin tam kurulumunun tamamlandığını ve TCP 8792 portunun açık olduğunu kontrol edin.", 0x10)
+		detail := ""
+		if err := checkHealth(candidate); err != nil {
+			detail = "\n\nDoğrulama: " + err.Error()
+		}
+		messageBox(fullName+" — Server Bağlantısı", "Girilen Server adresi doğrulanamadı:\n"+candidate+detail+"\n\nServer bilgisayarında güncel EBS_Admin_Installer.exe kurulumunu tamamlayın ve TCP 8792 portunu kontrol edin.", 0x10)
 	}
 	return ""
 }
@@ -368,7 +366,10 @@ func main() {
 		role := map[string]string{"admin": "Admin", "personnel": "Personel", "customer": "Müşteri"}[clientMode]
 		detail := ""
 		if clientMode == "admin" {
-			detail = "\n\nAdmin bilgisayarında EBS Server servisinin kurulmuş ve çalışıyor olması gerekir. Kurulum paketindeki “EBS_Admin_TAM_Kurulum_v3.0_PRO.exe” dosyasını yönetici olarak yeniden çalıştırın."
+			detail = "\n\nAdmin bilgisayarında güncel EBS Server servisinin çalışması ve işlem motorunun hazır olması gerekir. Kurulum paketindeki “EBS_Admin_Installer.exe” dosyasını yönetici olarak çalıştırın."
+			if err := checkHealth("http://localhost:8792"); err != nil {
+				detail += "\n\nDoğrulama: " + err.Error()
+			}
 		} else {
 			detail = "\n\nBu bilgisayar Server bilgisayarı değildir. Aynı yerel ağa bağlı olduğunuzu ve Server bilgisayarında Admin tam kurulumunun yapıldığını kontrol edin. Program artık bağlantı bulunamadığında 127.0.0.1 adresini açmaz."
 		}

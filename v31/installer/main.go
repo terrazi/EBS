@@ -1,3 +1,5 @@
+//go:build windows
+
 package main
 
 import (
@@ -5,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -74,7 +75,46 @@ func logf(f string, a ...any) {
 	}
 }
 func exists(p string) bool { _, e := os.Stat(p); return e == nil }
-func stopExe(name string)  { _ = exec.Command("taskkill.exe", "/F", "/IM", name).Run() }
+
+// stopInstalledExe stops only a process whose executable path is the file we
+// are about to replace. Matching by image name (taskkill /IM) could terminate
+// an unrelated program with the same filename on a shared training PC.
+func stopInstalledExe(path string) error {
+	target, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	script := fmt.Sprintf("$target='%s'; Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop }", psQuote(target), psQuote(filepath.Base(target)))
+	if err := powershell(script); err != nil {
+		return err
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if !installedProcess(path) {
+			return nil
+		}
+		time.Sleep(150 * time.Millisecond)
+	}
+	return fmt.Errorf("çalışan süreç durdurulamadı: %s", path)
+}
+
+func installedProcess(path string) bool {
+	target, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	script := fmt.Sprintf("$target='%s'; $p=Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) }; if($p){ exit 0 } else { exit 1 }", psQuote(target), psQuote(filepath.Base(target)))
+	return powershell(script) == nil
+}
+
+func portInUse(addr string) bool {
+	c, err := net.DialTimeout("tcp", addr, 450*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	_ = c.Close()
+	return true
+}
 func run(name string, args ...string) error {
 	logf("RUN %s %s", name, strings.Join(args, " "))
 	c := exec.Command(name, args...)
@@ -109,7 +149,9 @@ func writePayload(name, dst string) error {
 	if e = os.WriteFile(tmp, b, 0755); e != nil {
 		return e
 	}
-	_ = os.Remove(dst)
+	if e = os.Remove(dst); e != nil && !os.IsNotExist(e) {
+		return fmt.Errorf("önceki kurulum dosyası değiştirilemedi (%s): %w", dst, e)
+	}
 	return os.Rename(tmp, dst)
 }
 func copyFile(src, dst string) error {
@@ -179,7 +221,9 @@ func installClient(role string) (string, error) {
 		label = "Müşteri"
 	}
 	dst := filepath.Join(dir, name)
-	stopExe(name)
+	if e := stopInstalledExe(dst); e != nil && installedProcess(dst) {
+		return "", fmt.Errorf("eski %s istemcisi kapatılamadı: %w", label, e)
+	}
 	preserveLegacy(dst, strings.TrimSuffix(name, ".exe"))
 	if e := writePayload(payloadName, dst); e != nil {
 		return "", e
@@ -191,15 +235,6 @@ func installClient(role string) (string, error) {
 	return dst, nil
 }
 
-func healthOK(base string) bool {
-	c := &http.Client{Timeout: 1200 * time.Millisecond}
-	r, e := c.Get(base + "/health")
-	if e != nil {
-		return false
-	}
-	defer r.Body.Close()
-	return r.StatusCode >= 200 && r.StatusCode < 300
-}
 func waitHealth(base string, d time.Duration) bool {
 	end := time.Now().Add(d)
 	for time.Now().Before(end) {
@@ -255,7 +290,15 @@ func installServer() (string, error) {
 	_ = os.MkdirAll(srv, 0755)
 	v3 := filepath.Join(srv, "EBS_v3_Service.exe")
 	core := filepath.Join(srv, "EBS_Core_Server.exe")
-	stopExe("EBS_v3_Service.exe")
+	_ = run("sc.exe", "stop", "EBSv3ProService")
+	if e := stopInstalledExe(v3); e != nil && installedProcess(v3) {
+		return "", fmt.Errorf("eski merkezi Server kapatılamadı: %w", e)
+	}
+	// Do not kill an unrelated listener. If 8792 is occupied by another
+	// application, report it before replacing files or registering the service.
+	if portInUse("127.0.0.1:8792") && !healthOK("http://localhost:8792") {
+		return "", fmt.Errorf("8792 portu başka bir uygulama tarafından kullanılıyor; mevcut süreç kapatılmadı")
+	}
 	if e := writePayload("EBS_v3_Service.exe", v3); e != nil {
 		return "", e
 	}
@@ -268,7 +311,6 @@ func installServer() (string, error) {
 	_ = run("netsh.exe", "advfirewall", "firewall", "delete", "rule", "name=EBS v3 STABLE Discovery 8793")
 	_ = run("netsh.exe", "advfirewall", "firewall", "add", "rule", "name=EBS v3 STABLE Discovery 8793", "dir=in", "action=allow", "protocol=UDP", "localport=8793")
 
-	_ = run("sc.exe", "stop", "EBSv3ProService")
 	_ = run("sc.exe", "delete", "EBSv3ProService")
 	time.Sleep(800 * time.Millisecond)
 	quoted := `"` + v3 + `"`

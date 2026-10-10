@@ -35,6 +35,11 @@ var embedded embed.FS
 
 const legacyBase = "http://127.0.0.1:8787"
 
+const (
+	centralProtocol = "ebs-v31"
+	centralBuild    = "20261010-login-fix-6"
+)
+
 type operationalAlias struct {
 	LegacyUsername string
 	PublicUsername string
@@ -576,6 +581,11 @@ func discoveryResponder(stop <-chan struct{}) {
 }
 
 func newHTTPServer(stop <-chan struct{}) *http.Server {
+	logPath := filepath.Join(programData(), "service.log")
+	_ = os.MkdirAll(filepath.Dir(logPath), 0755)
+	if f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
+		log.SetOutput(f)
+	}
 	store := newStore()
 	v3mux := v3APIMux(store)
 	var engine *sim.Engine
@@ -584,6 +594,9 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 	// clients use the authenticated transactional /v3api/api/v3 endpoints.
 	if opened, err := sim.Open(filepath.Join(programData(), "ebs-v31.sqlite3")); err != nil {
 		log.Printf("v3 simulation engine unavailable: %v", err)
+		v3mux.HandleFunc("/api/v3/login", func(w http.ResponseWriter, r *http.Request) {
+			jsonOut(w, http.StatusServiceUnavailable, map[string]any{"error": "V3 işlem motoru hazır değil; Server veritabanı başlatılamadı."})
+		})
 	} else {
 		engine = opened
 		installSimulationAPI(v3mux, engine)
@@ -594,7 +607,7 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAPIReady(), "api_mode": "central-hybrid"})
+		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAPIReady(), "api_mode": "central-hybrid", "protocol": centralProtocol, "build": centralBuild, "engine_ready": engine != nil})
 	})
 	mux.HandleFunc("/runtime.json", func(w http.ResponseWriter, r *http.Request) {
 		jsonOut(w, 200, map[string]any{
@@ -603,11 +616,14 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 			"full_name":    "ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ",
 			"product_name": "BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU",
 			"upstream":     "merkezi v3 işlem motoru",
-			"upstream_ok":  true,
+			"upstream_ok":  engine != nil,
 			"legacy_ok":    legacyAPIReady(),
 			"v3":           "merkezi v3 servis",
-			"v3_ok":        true,
+			"v3_ok":        engine != nil,
 			"legacy_url":   "/legacy/",
+			"protocol":     centralProtocol,
+			"build":        centralBuild,
+			"engine_ready": engine != nil,
 		})
 	})
 	mux.HandleFunc("/design_cards.json", func(w http.ResponseWriter, r *http.Request) {
@@ -669,11 +685,6 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 	addr := os.Getenv("EBS_V3_LISTEN")
 	if addr == "" {
 		addr = ":8792"
-	}
-	logPath := filepath.Join(programData(), "service.log")
-	_ = os.MkdirAll(filepath.Dir(logPath), 0755)
-	if f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
-		log.SetOutput(f)
 	}
 	go superviseLegacy(stop)
 	go discoveryResponder(stop)

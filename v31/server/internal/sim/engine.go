@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,7 +48,7 @@ func Open(path string) (*Engine, error) {
 			return nil, err
 		}
 	}
-	db, err := sql.Open("sqlite3", path+"?_pragma=foreign_keys(1)&_pragma=busy_timeout(10000)")
+	db, err := sql.Open("sqlite3", sqliteDSN(path))
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +59,42 @@ func Open(path string) (*Engine, error) {
 		return nil, err
 	}
 	return e, nil
+}
+
+// sqliteDSN returns a real SQLite URI rather than appending query text to a
+// filename. The latter happens to create a file containing a '?' on Unix, but
+// is rejected by Windows and silently disables the driver's _pragma handling.
+// URL construction also protects spaces, Unicode, '#' and '?' in the path.
+func sqliteDSN(path string) string {
+	p := strings.ReplaceAll(path, `\`, "/")
+	u := url.URL{Scheme: "file"}
+	switch {
+	case strings.HasPrefix(p, "//"):
+		// Preserve UNC paths as a file URI authority.
+		rest := strings.TrimPrefix(p, "//")
+		if i := strings.IndexByte(rest, '/'); i >= 0 {
+			u.Host, u.Path = rest[:i], rest[i:]
+		} else {
+			u.Host = rest
+		}
+	case len(p) >= 2 && p[1] == ':':
+		// A Windows drive path must have a leading slash in a file URI:
+		// file:///C:/Program%20Files/…
+		u.Path = "/" + p
+	default:
+		// Open is normally given an absolute path. Making relative paths
+		// absolute avoids interpreting the first path component as a URI host.
+		if abs, err := filepath.Abs(path); err == nil {
+			u.Path = filepath.ToSlash(abs)
+		} else {
+			u.Path = p
+		}
+	}
+	q := url.Values{}
+	q.Add("_pragma", "foreign_keys(1)")
+	q.Add("_pragma", "busy_timeout(10000)")
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func (e *Engine) ensure() error {

@@ -2,8 +2,79 @@ package sim
 
 import (
 	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func TestSQLiteDSNUsesURIAndEscapesWindowsPath(t *testing.T) {
+	got := sqliteDSN(`C:\Program Files\EBS Bankacılık\müşteri #1?.sqlite3`)
+	u, err := url.Parse(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Scheme != "file" || u.Path != "/C:/Program Files/EBS Bankacılık/müşteri #1?.sqlite3" {
+		t.Fatalf("unexpected file URI: %s (path=%q)", got, u.Path)
+	}
+	q := u.Query()
+	if got := q["_pragma"]; len(got) != 2 || got[0] != "foreign_keys(1)" || got[1] != "busy_timeout(10000)" {
+		t.Fatalf("pragma query values: %#v in %s", got, got)
+	}
+	if strings.Contains(got, `\Program`) || strings.Contains(got, "#1?.sqlite3?") {
+		t.Fatalf("Windows path was not URI-escaped: %s", got)
+	}
+	if !strings.Contains(got, "%20") || !strings.Contains(got, "%23") || !strings.Contains(got, "%3F") {
+		t.Fatalf("special path characters were not escaped: %s", got)
+	}
+}
+
+func TestEngineOpenPersistsAndAppliesSQLitePragmas(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "müşteri #1?.sqlite3")
+	e, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foreignKeys, busyTimeout int
+	if err = e.DB.QueryRow("PRAGMA foreign_keys").Scan(&foreignKeys); err != nil {
+		t.Fatal(err)
+	}
+	if err = e.DB.QueryRow("PRAGMA busy_timeout").Scan(&busyTimeout); err != nil {
+		t.Fatal(err)
+	}
+	if foreignKeys != 1 || busyTimeout != 10000 {
+		t.Fatalf("SQLite pragmas foreign_keys=%d busy_timeout=%d", foreignKeys, busyTimeout)
+	}
+	if _, err = e.DB.Exec("CREATE TABLE persistence_marker(value TEXT NOT NULL)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = e.DB.Exec("INSERT INTO persistence_marker(value) VALUES(?)", "ok"); err != nil {
+		t.Fatal(err)
+	}
+	if err = e.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = os.Stat(path); err != nil {
+		t.Fatalf("database path was not created: %v", err)
+	}
+	if _, err = os.Stat(path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(10000)"); !os.IsNotExist(err) {
+		t.Fatalf("legacy query-suffixed database unexpectedly exists: %v", err)
+	}
+	e, err = Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	var value string
+	if err = e.DB.QueryRow("SELECT value FROM persistence_marker").Scan(&value); err != nil {
+		t.Fatal(err)
+	}
+	if value != "ok" {
+		t.Fatalf("persisted marker=%q", value)
+	}
+}
 
 func TestEngineOpenLoginAndAtomicDeposit(t *testing.T) {
 	e, err := Open(t.TempDir() + "/ebs.sqlite3")
