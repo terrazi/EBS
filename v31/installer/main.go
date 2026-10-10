@@ -324,11 +324,6 @@ func installServer() (string, error) {
 	if !waitHealth("http://localhost:8792", 8*time.Second) {
 		return "", fmt.Errorf("merkezi v3 Server 8792 portunda başlatılamadı")
 	}
-	// Legacy core yalnız uyumluluk köprüsü için denenir; başarısızlığı kurulumu bozmaz.
-	if exists(core) {
-		start(core)
-	}
-
 	cmd := filepath.Join(srv, "EBS_Server_Baslat.cmd")
 	script := "@echo off\r\n" +
 		"cd /d \"%~dp0\"\r\n" +
