@@ -106,6 +106,9 @@ func installSimulationAPI(mux *http.ServeMux, engine *sim.Engine) {
 		resource := r.URL.Query().Get("resource")
 		out, known, err := engine.BankingQuery(u, resource, r.URL.Query())
 		if !known {
+			out, known, err = engine.TrainingQuery(u, resource, r.URL.Query())
+		}
+		if !known {
 			jsonOut(w, 404, map[string]any{"error": "RESOURCE: Kaynak bulunamadı."})
 			return
 		}

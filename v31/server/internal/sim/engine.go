@@ -84,6 +84,9 @@ func (e *Engine) ensure() error {
 	if err = seedBanking(tx); err != nil {
 		return err
 	}
+	if err = ensureTrainingSchema(tx); err != nil {
+		return err
+	}
 	if err = tx.Commit(); err != nil {
 		return err
 	}
@@ -146,6 +149,9 @@ func (e *Engine) Execute(u User, op string, p Payload) (out Result, err error) {
 		handled = true
 	case strings.HasPrefix(op, "document."):
 		out, err = Documents(tx, u, op, p)
+		handled = true
+	case strings.HasPrefix(op, "training."):
+		out, err = Training(tx, u, op, p)
 		handled = true
 	default:
 		err = fmt.Errorf("OPERATION: Desteklenmeyen işlem: %s", op)

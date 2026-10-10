@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -55,5 +56,47 @@ func TestEngineOpenLoginAndAtomicDeposit(t *testing.T) {
 	}
 	if after != before+12500 {
 		t.Fatalf("duplicate changed balance: %d", after)
+	}
+}
+
+func TestTrainingAssignmentProgressAndScore(t *testing.T) {
+	e, err := Open(t.TempDir() + "/training.sqlite3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	adminLogin, err := e.Login("admin", "EBS2026!", "admin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	admin, err := e.Session(adminLogin["token"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	studentLogin, err := e.Login("gise01", "1234", "personnel")
+	if err != nil {
+		t.Fatal(err)
+	}
+	student, err := e.Session(studentLogin["token"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	assigned, err := e.Execute(admin, "training.assign", Payload{"scenario_id": "1", "trainee_username": "gise01"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := fmt.Sprint(assigned["id"])
+	if _, err = e.Execute(student, "training.start", Payload{"assignment_id": id}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = e.Execute(student, "training.record_step", Payload{"assignment_id": id, "step_no": "1", "operation": "banking.cash_open", "passed": "true", "score": "50", "attempt_no": "1", "reference": "EBS-TRAIN-1"}); err != nil {
+		t.Fatal(err)
+	}
+	completed, err := e.Execute(student, "training.complete", Payload{"assignment_id": id})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if completed["status"] != "COMPLETED" {
+		t.Fatalf("training result: %#v", completed)
 	}
 }
