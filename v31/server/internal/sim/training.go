@@ -173,13 +173,19 @@ func (e *Engine) TrainingQuery(u User, resource string, q url.Values) (any, bool
 		return nil, true, err
 	}
 	resource = strings.ToLower(strings.ReplaceAll(strings.Trim(resource, "/"), "_", "-"))
-	if resource != "assignments" && resource != "scenarios" && resource != "leaderboard" {
+	if resource != "assignments" && resource != "scenarios" && resource != "leaderboard" && resource != "trainees" {
 		return nil, false, nil
 	}
-	if resource != "scenarios" && u.Role != "ADMIN" && u.Role != "PERSONEL" {
+	if resource == "trainees" && u.Role != "ADMIN" {
+		return nil, true, ErrForbidden
+	}
+	if resource != "scenarios" && resource != "trainees" && u.Role != "ADMIN" && u.Role != "PERSONEL" {
 		return nil, true, ErrForbidden
 	}
 	switch resource {
+	case "trainees":
+		rows, err := Rows(e.DB, "SELECT id,username,display_name,department,role FROM users WHERE role='PERSONEL' AND active=1 ORDER BY display_name")
+		return rows, true, err
 	case "scenarios":
 		rows, err := Rows(e.DB, "SELECT * FROM training_scenarios WHERE active=1 ORDER BY id")
 		return rows, true, err
