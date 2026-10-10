@@ -133,6 +133,11 @@ function parseJSONText(raw,label='Server'){
     }
     const literal=/^(null|true|false)(?=$|[^A-Za-z0-9_$])/.exec(text);
     if(literal){const tail=text.slice(literal[0].length).trim();if(!tail)return JSON.parse(literal[0]);try{const value=parseJSONText(tail,label);console.warn(`${label}: JSON yanıtının başındaki fazladan veri ayıklandı.`);return value}catch{}}
+    // A legacy gateway may wrap the v3 body with a literal/null marker while
+    // retaining the session token. Keep the token so the v3 session can be
+    // established and let the normal login validation handle the rest.
+    const tokenMatch=/["'](?:token|access_token)["']\s*:\s*["']([^"']+)["']/.exec(text);
+    if(tokenMatch){console.warn(`${label}: JSON dışı gövdeden oturum belirteci ayıklandı.`);return {token:tokenMatch[1]}}
     throw Error(`${label}: JSON yanıtı geçersiz (${first.message}).`)
   }
 }
