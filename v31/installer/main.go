@@ -318,10 +318,11 @@ func installServer() (string, error) {
 	_ = run("sc.exe", "description", "EBSv3ProService", productName+" merkezi Server")
 	_ = run("sc.exe", "failure", "EBSv3ProService", "reset=", "86400", "actions=", "restart/5000/restart/10000/restart/30000")
 	_ = run("sc.exe", "start", "EBSv3ProService")
-	if !waitHealth("http://localhost:8792", 7*time.Second) {
-		start(v3, "--console")
-	}
-	if !waitHealth("http://localhost:8792", 8*time.Second) {
+	// The executable is registered with SCM above. Starting a second
+	// --console copy while the service is still booting can race SQLite and
+	// leave both processes unhealthy. Wait for the registered service and let
+	// SCM's recovery policy handle a genuine startup failure.
+	if !waitHealth("http://localhost:8792", 15*time.Second) {
 		return "", fmt.Errorf("merkezi v3 Server 8792 portunda başlatılamadı")
 	}
 	cmd := filepath.Join(srv, "EBS_Server_Baslat.cmd")
