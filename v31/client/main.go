@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/url"
 	"os"
@@ -196,6 +197,19 @@ func startIfExists(path string) {
 	}
 }
 
+// stopExactProcess is used only for an EBS service executable at the known
+// installation path. It also handles the previous console-mode startup task,
+// which SCM cannot stop because it is not registered as a service.
+func stopExactProcess(path string) bool {
+	target, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	quote := func(s string) string { return strings.ReplaceAll(s, "'", "''") }
+	script := fmt.Sprintf("$target='%s'; Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop }", quote(target), quote(filepath.Base(target)))
+	return exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script).Run() == nil
+}
+
 func ensureAdminServices() {
 	if clientMode != "admin" {
 		return
@@ -212,6 +226,9 @@ func ensureAdminServices() {
 		if c, err := net.DialTimeout("tcp", "localhost:8792", 400*time.Millisecond); err == nil {
 			_ = c.Close()
 			_ = exec.Command("sc.exe", "stop", "EBSv3ProService").Run()
+			// Older installers also created a console-mode Startup shortcut;
+			// stop that exact binary before SCM starts the fresh service.
+			_ = stopExactProcess(filepath.Join(installRoot(), "Server", "EBS_v3_Service.exe"))
 			time.Sleep(900 * time.Millisecond)
 			_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
 			if waitHealth(local, 8*time.Second) {
