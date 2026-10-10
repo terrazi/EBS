@@ -272,7 +272,7 @@ function renderTable(rows){
   const keys=[...new Set(rows.flatMap(o=>Object.keys(o||{})))].filter(k=>!/(password|token|hash|secret|raw)/i.test(k)).slice(0,7);
   const id=`ebs-table-${++tableSequence}`;
   tableSortState[id]={rows,keys,criteria:[]};
-  return `<div class="table-wrap"><table class="data-table" id="${id}" data-sortable="true"><thead><tr>${keys.map(k=>`<th class="sortable" role="button" tabindex="0" data-sort-key="${esc(k)}" onclick="EBS.sortTable('${id}','${esc(k)}',event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();EBS.sortTable('${id}','${esc(k)}',event)}">${esc(labelTR(k))}<span class="sort-mark" aria-hidden="true"></span></th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr data-row-index="${i}">${keys.map(k=>`<td>${esc(formatVal(r?.[k],k))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+  return `<div class="table-wrap"><table class="data-table" id="${id}" data-sortable="true"><thead><tr>${keys.map(k=>`<th class="sortable" role="button" tabindex="0" data-sort-key="${esc(k)}" onclick="EBS.sortTable('${id}','${esc(k)}',event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();EBS.sortTable('${id}','${esc(k)}',event)}">${esc(labelTR(k))}<span class="sort-mark" aria-hidden="true"></span></th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr data-row-index="${i}">${keys.map(k=>`<td>${tableCell(r,k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
 }
 function sortValue(v){
   if(v==null)return {empty:true,text:''};
@@ -307,7 +307,7 @@ function sortTable(id,key,event={}){
     return a.index-b.index;
   });
   const tbody=table.tBodies[0];
-  tbody.innerHTML=indexed.map(({row,index})=>`<tr data-row-index="${index}">${state.keys.map(k=>`<td>${esc(formatVal(row?.[k],k))}</td>`).join('')}</tr>`).join('');
+  tbody.innerHTML=indexed.map(({row,index})=>`<tr data-row-index="${index}">${state.keys.map(k=>`<td>${tableCell(row,k)}</td>`).join('')}</tr>`).join('');
   table.querySelectorAll('th[data-sort-key]').forEach(th=>{
     const c=state.criteria.find(x=>x.key===th.dataset.sortKey);
     th.classList.toggle('sorted',!!c);th.dataset.sortDirection=c?.direction||'';
@@ -315,6 +315,7 @@ function sortTable(id,key,event={}){
     if(marker)marker.textContent=c?`${c.direction==='asc'?'▲':'▼'} ${state.criteria.indexOf(c)+1}`:'';
   });
 }
+function tableCell(row,key){if(key==='download_url'&&row?.[key])return `<a class="btn sm outline" href="${esc(row[key])}" target="_blank" rel="noopener">PDF indir</a>`;return esc(formatVal(row?.[key],key))}
 function formatVal(v,k=''){if(v==null)return'';if(typeof v==='boolean')return v?'Evet':'Hayır';if(Array.isArray(v))return v.slice(0,3).map(x=>typeof x==='object'?JSON.stringify(x):x).join(', ');if(typeof v==='object')return JSON.stringify(v);let s=String(v);if(/status|durum/i.test(k)){const m={pending:'Bekliyor',open:'Açık',closed:'Kapalı',completed:'Tamamlandı',approved:'Onaylandı',rejected:'Reddedildi',active:'Aktif',inactive:'Pasif',new:'Yeni',in_progress:'İşlemde'};s=m[s.toLowerCase()]||s}return s}
 async function loadCardHistory(code){const h=$('#cardHistory');if(!h)return;try{const x=await api(`/v3api/api/card/${encodeURIComponent(code)}`);const rows=arr(x);if(!rows.length)return;h.innerHTML=`<div class="section-title"><h4>v3.0 PRO İşlem Geçmişi</h4></div><div class="card">${renderTable(rows)}</div>`}catch{}}
 async function cardAction(code,action,critical){const form=$('#cardForm');const operation=cardOperation[code];if(form&&!form.checkValidity()){form.reportValidity();return}const payload=operationPayload(code,form?formObj(form):{});try{if(!operation){throw Error('Bu ekranın gerçek işlem akışı henüz bağlanmadı; işlem başarılı gösterilmedi.')}const x=await realOperation(operation,payload);toast(`${action} tamamlandı. Referans: ${x.reference||'oluşturuldu'}`);loadCardHistory(code)}catch(e){toast(`Merkezi işlem: ${e.message}`,true)}}

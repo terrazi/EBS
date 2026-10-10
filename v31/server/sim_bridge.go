@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"ebs-v3-service/internal/sim"
@@ -52,6 +53,37 @@ func installSimulationAPI(mux *http.ServeMux, engine *sim.Engine) {
 			return
 		}
 		jsonOut(w, 200, u)
+	})
+	mux.HandleFunc("/api/v3/document/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			jsonOut(w, http.StatusMethodNotAllowed, map[string]any{"error": "METHOD: Yalnız GET desteklenir."})
+			return
+		}
+		u, err := engine.Session(bearer(r))
+		if err != nil {
+			jsonOut(w, http.StatusUnauthorized, map[string]any{"error": err.Error()})
+			return
+		}
+		part := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/v3/document/"), "/")
+		part = strings.TrimSuffix(part, "/download")
+		id, parseErr := strconv.ParseInt(part, 10, 64)
+		if parseErr != nil || id == 0 {
+			jsonOut(w, http.StatusBadRequest, map[string]any{"error": "DOCUMENT: Geçerli belge ID'si gerekli."})
+			return
+		}
+		body, name, err := engine.DownloadDocument(u, id)
+		if err != nil {
+			status := http.StatusNotFound
+			if errors.Is(err, sim.ErrForbidden) {
+				status = http.StatusForbidden
+			}
+			jsonOut(w, status, map[string]any{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(body)
 	})
 	mux.HandleFunc("/api/v3/operation", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {

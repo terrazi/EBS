@@ -303,11 +303,49 @@ func (e *Engine) DocumentsQuery(u User, resource string, q url.Values) (any, boo
 	}
 	if u.Role == "CUSTOMER" {
 		rows, err := Rows(e.DB, `SELECT id,customer_id,document_type,reference,status,path,training_notice,created_at FROM app_documents WHERE customer_id=? AND status<>'DELETED' ORDER BY id DESC`, u.CustomerID)
-		return rows, true, err
+		return publicDocuments(rows), true, err
 	}
 	if err := Staff(u); err != nil {
 		return nil, true, err
 	}
 	rows, err := Rows(e.DB, `SELECT id,customer_id,document_type,reference,status,path,training_notice,created_at FROM app_documents WHERE status<>'DELETED' ORDER BY id DESC LIMIT 500`)
-	return rows, true, err
+	return publicDocuments(rows), true, err
+}
+
+func publicDocuments(rows []Result) []Result {
+	for _, row := range rows {
+		id := ID(row, "id")
+		delete(row, "path")
+		row["download_url"] = fmt.Sprintf("/v3api/api/v3/document/%d/download", id)
+	}
+	return rows
+}
+
+// DownloadDocument checks ownership before reading the generated artifact.
+// Callers receive bytes only; server filesystem paths never leave the service.
+func (e *Engine) DownloadDocument(u User, id int64) ([]byte, string, error) {
+	row, err := Row(e.DB, `SELECT id,customer_id,status,path FROM app_documents WHERE id=?`, id)
+	if err != nil {
+		return nil, "", err
+	}
+	if Text(row, "status") == "DELETED" || Text(row, "status") == "REJECTED" {
+		return nil, "", fmt.Errorf("DOCUMENT: Belge indirilebilir durumda değil.")
+	}
+	if u.Role == "CUSTOMER" && ID(row, "customer_id") != u.CustomerID {
+		return nil, "", ErrForbidden
+	}
+	if u.Role != "CUSTOMER" {
+		if err := Staff(u); err != nil {
+			return nil, "", err
+		}
+	}
+	path := Text(row, "path")
+	if path == "" {
+		return nil, "", fmt.Errorf("DOCUMENT: Dosya henüz oluşturulmadı.")
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, "", fmt.Errorf("DOCUMENT: Dosya okunamadı.")
+	}
+	return b, fmt.Sprintf("EBS_Egitim_Belgesi_%d.pdf", id), nil
 }
