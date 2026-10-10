@@ -18,6 +18,10 @@ import (
 
 var clientMode = "personnel" // admin | personnel | customer
 
+// Keep the last health failure so a discovery/startup problem is actionable
+// instead of always being shown as a generic "Server bulunamadı" message.
+var resolveDetail string
+
 const fullName = "ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ"
 const productName = "BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU"
 
@@ -118,14 +122,34 @@ func deriveV3(raw string) string {
 }
 
 func waitHealth(base string, d time.Duration) bool {
+	ok, _ := waitHealthReason(base, d)
+	return ok
+}
+
+func waitHealthReason(base string, d time.Duration) (bool, error) {
 	deadline := time.Now().Add(d)
+	var last error
 	for time.Now().Before(deadline) {
-		if healthOK(base) {
-			return true
+		if err := checkHealth(base); err == nil {
+			return true, nil
+		} else {
+			last = err
 		}
 		time.Sleep(350 * time.Millisecond)
 	}
-	return healthOK(base)
+	if err := checkHealth(base); err == nil {
+		return true, nil
+	} else if last != nil {
+		return false, last
+	} else {
+		return false, err
+	}
+}
+
+func rememberHealthFailure(base string, err error) {
+	if err != nil && strings.TrimSpace(base) != "" {
+		resolveDetail = base + " — " + healthErrorText(err)
+	}
 }
 
 func localServerURL() string {
@@ -182,10 +206,17 @@ func ensureAdminServices() {
 	_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
 	local := "http://localhost:8792"
 	if !waitHealth(local, 2500*time.Millisecond) {
-		// A listener that failed protocol/build/readiness checks must not be
-		// mistaken for the current server, or receive another console process.
+		// A listener that failed protocol/build/readiness checks may be an older
+		// registered EBS service. Ask SCM to restart it before deciding that the
+		// server is unavailable. We never kill an unrelated listener here.
 		if c, err := net.DialTimeout("tcp", "localhost:8792", 400*time.Millisecond); err == nil {
 			_ = c.Close()
+			_ = exec.Command("sc.exe", "stop", "EBSv3ProService").Run()
+			time.Sleep(900 * time.Millisecond)
+			_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
+			if waitHealth(local, 8*time.Second) {
+				return
+			}
 			return
 		}
 		srv := filepath.Join(installRoot(), "Server")
@@ -255,13 +286,14 @@ func promptServerAddress() string {
 		return ""
 	}
 	candidate := normalizeServerInput(strings.TrimSpace(string(out)))
-	if candidate != "" && waitHealth(candidate, 5*time.Second) {
+	if candidate != "" && waitHealth(candidate, 7*time.Second) {
 		saveV3URL(candidate)
 		return candidate
 	}
 	if candidate != "" {
 		detail := ""
 		if err := checkHealth(candidate); err != nil {
+			rememberHealthFailure(candidate, err)
 			detail = "\n\nDoğrulama: " + err.Error()
 		}
 		messageBox(fullName+" — Server Bağlantısı", "Girilen Server adresi doğrulanamadı:\n"+candidate+detail+"\n\nServer bilgisayarında güncel EBS_Admin_Installer.exe kurulumunu tamamlayın ve TCP 8792 portunu kontrol edin.", 0x10)
@@ -270,11 +302,15 @@ func promptServerAddress() string {
 }
 
 func resolveV3URL() string {
+	resolveDetail = ""
 	if s := os.Getenv("EBS_V3_URL"); s != "" {
 		s = trimURL(s)
-		if healthOK(s) {
+		if waitHealth(s, 5*time.Second) {
 			saveV3URL(s)
 			return s
+		}
+		if err := checkHealth(s); err != nil {
+			rememberHealthFailure(s, err)
 		}
 	}
 
@@ -295,13 +331,23 @@ func resolveV3URL() string {
 		}
 	}
 
-	if s := savedV3URL(); s != "" && healthOK(s) {
-		return s
+	if s := savedV3URL(); s != "" {
+		if waitHealth(s, 6*time.Second) {
+			return s
+		}
+		if err := checkHealth(s); err != nil {
+			rememberHealthFailure(s, err)
+		}
 	}
 	if s := legacySavedURL(); s != "" {
-		if v := deriveV3(s); v != "" && healthOK(v) {
-			saveV3URL(v)
-			return v
+		if v := deriveV3(s); v != "" {
+			if waitHealth(v, 6*time.Second) {
+				saveV3URL(v)
+				return v
+			}
+			if err := checkHealth(v); err != nil {
+				rememberHealthFailure(v, err)
+			}
 		}
 	}
 
@@ -309,22 +355,37 @@ func resolveV3URL() string {
 	// Bu deneme uzak istemcide yalnız kısa bir timeout maliyetine sahiptir ve
 	// Admin ile birlikte kurulan Personel/Müşteri Client'ların bağlantısını kararlı yapar.
 	local := "http://localhost:8792"
-	if waitHealth(local, 1800*time.Millisecond) {
+	if waitHealth(local, 3*time.Second) {
 		saveV3URL(local)
 		return local
 	}
+	if err := checkHealth(local); err != nil {
+		rememberHealthFailure(local, err)
+	}
 
 	// New v3 discovery channel.
-	if s := discover(8793, "EBS_V3_DISCOVER", 2200*time.Millisecond); s != "" && healthOK(s) {
-		saveV3URL(s)
-		return s
+	if s := discover(8793, "EBS_V3_DISCOVER", 3500*time.Millisecond); s != "" {
+		// Discovery starts before SQLite schema initialization. Wait for this
+		// same candidate instead of rejecting a valid server during boot.
+		if waitHealth(s, 7*time.Second) {
+			saveV3URL(s)
+			return s
+		}
+		if err := checkHealth(s); err != nil {
+			rememberHealthFailure(s, err)
+		}
 	}
 
 	// Compatibility: discover the old 8787 gateway and convert its host to the v3 service.
-	if s := discover(8788, "EBS_DISCOVER", 1800*time.Millisecond); s != "" {
-		if v := deriveV3(s); v != "" && healthOK(v) {
-			saveV3URL(v)
-			return v
+	if s := discover(8788, "EBS_DISCOVER", 2500*time.Millisecond); s != "" {
+		if v := deriveV3(s); v != "" {
+			if waitHealth(v, 6*time.Second) {
+				saveV3URL(v)
+				return v
+			}
+			if err := checkHealth(v); err != nil {
+				rememberHealthFailure(v, err)
+			}
 		}
 	}
 	if s := promptServerAddress(); s != "" {
@@ -372,6 +433,9 @@ func main() {
 			}
 		} else {
 			detail = "\n\nBu bilgisayar Server bilgisayarı değildir. Aynı yerel ağa bağlı olduğunuzu ve Server bilgisayarında Admin tam kurulumunun yapıldığını kontrol edin. Program artık bağlantı bulunamadığında 127.0.0.1 adresini açmaz."
+		}
+		if resolveDetail != "" {
+			detail += "\n\nSon doğrulama: " + resolveDetail
 		}
 		messageBox(fullName+" — "+role, "EBS merkezi Server bulunamadı."+detail, 0x10)
 		return
