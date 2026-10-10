@@ -565,6 +565,9 @@ func bankingFXTrade(tx *sql.Tx, u User, p Payload) (Result, error) {
 	if err != nil {
 		return nil, err
 	}
+	if u.Role == "CUSTOMER" && ID(target, "customer_id") != u.CustomerID {
+		return nil, ErrForbidden
+	}
 	base, quote := Text(source, "currency"), Text(target, "currency")
 	if base == quote {
 		return nil, fmt.Errorf("FX: Kaynak ve hedef para birimi farklı olmalıdır.")

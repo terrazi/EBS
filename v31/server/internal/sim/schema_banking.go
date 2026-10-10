@@ -231,9 +231,9 @@ func seedBanking(tx *sql.Tx) error {
 		{"gise02", "Gişe Yetkilisi 2", "PERSONEL", "Gişe / Kasa", []string{"banking"}},
 		{"musteritemsilci", "Müşteri Temsilcisi", "PERSONEL", "Müşteri Hizmetleri", []string{"banking"}},
 		{"operasyonyetkilisi", "Operasyon Yetkilisi", "PERSONEL", "Operasyon", []string{"banking", "banking:approve"}},
-		{"krediyetkilisi", "Kredi Yetkilisi", "PERSONEL", "Krediler", []string{"banking"}},
-		{"sigortayetkilisi", "Sigorta Yetkilisi", "PERSONEL", "Sigorta", []string{"banking"}},
-		{"hasaryetkilisi", "Hasar Yetkilisi", "PERSONEL", "Hasar", []string{"banking"}},
+		{"krediyetkilisi", "Kredi Yetkilisi", "PERSONEL", "Krediler", []string{"banking", "credit", "cards"}},
+		{"sigortayetkilisi", "Sigorta Yetkilisi", "PERSONEL", "Sigorta", []string{"banking", "insurance"}},
+		{"hasaryetkilisi", "Hasar Yetkilisi", "PERSONEL", "Hasar", []string{"banking", "claims"}},
 		{"denetci", "Denetçi", "PERSONEL", "Denetim", []string{"banking:read"}},
 	}
 	for _, s := range staff {
