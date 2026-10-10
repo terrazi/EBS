@@ -19,3 +19,11 @@ Bu kayıt, teslimatı tamamlanmış göstermemek için mevcut kod ile V3.1 sözl
 - Windows UAC, servis, Defender/firewall, LAN keşfi, kısayol, kaldırma, yedekleme/geri yükleme ve yükseltme testleri yapılmadı.
 
 Bu dosya bir tamamlanma beyanı değildir; her madde kapatılmadan nihai ZIP'ler bitmiş ürün olarak yayımlanmayacaktır.
+
+## 10 Ekim ilerleme kaydı
+
+- V3.1 Go kaynak ağacı ve payload kaynakları `v31/` altında korunuyor.
+- `internal/sim` içinde SQLite işlem motoru, salted demo oturumları, sahiplik kontrolleri, kasa/hesap/transfer/ödeme/FX/otomatik ödeme akışları ile kredi/kart/sigorta/belge vertical slice'ları eklendi.
+- Yeni istemci API'si `/v3api/api/v3/login`, `/v3api/api/v3/session`, `/v3api/api/v3/operation` ve `/v3api/api/v3/query` oturum ve transaction sınırlarıyla bağlandı.
+- Go Linux testleri ve Windows amd64 cross-build doğrulandı; fiziksel Windows çalıştırma/UAC/SCM/LAN kabulü hâlâ yapılmadı.
+- 206 kartın tamamı bu API'ye bağlanmış değildir; kart bazlı uygulama ve UI kabulleri devam ediyor.
