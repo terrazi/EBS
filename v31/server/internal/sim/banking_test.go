@@ -92,6 +92,25 @@ func TestSeedBankingCreatesV31DemoUniverse(t *testing.T) {
 	}
 }
 
+func TestOpenInitializesCommonAndBankingTables(t *testing.T) {
+	e, err := Open(filepath.Join(t.TempDir(), "ebs.sqlite3"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	result, err := e.Login("gise01", "1234", "personnel")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result["token"] == "" {
+		t.Fatal("login did not return a session token")
+	}
+	var count int
+	if err = e.DB.QueryRow("SELECT COUNT(*) FROM accounts").Scan(&count); err != nil || count != 60 {
+		t.Fatalf("accounts count=%d err=%v", count, err)
+	}
+}
+
 func TestLoginSessionClientRoleAndLogout(t *testing.T) {
 	e := testEngine(t)
 	staff, err := e.Login("gise01", "1234", "personel")
