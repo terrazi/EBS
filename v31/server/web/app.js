@@ -116,7 +116,26 @@ function split(s){return String(s||'').split(/\s*[•·]\s*|\s+\|\s+/).map(x=>x.
 function codePrefix(c){return String(c||'').split('-')[0]}
 function card(code){return S.cards.find(x=>x.code===code)}
 function can(perm){if(!perm||!S.permissions?.length)return true;return S.permissions.includes(perm)||S.permissions.includes('*')}
-function parseJSONText(raw,label='Server'){const text=String(raw??'').trim();try{return JSON.parse(text)}catch(first){let depth=0,inString=false,escaped=false;for(let i=0;i<text.length;i++){const ch=text[i];if(inString){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch==='\"')inString=false;continue}if(ch==='\"'){inString=true;continue}if(ch==='{'||ch==='[')depth++;else if(ch==='}'||ch===']'){depth--;if(depth===0){try{const value=JSON.parse(text.slice(0,i+1));console.warn(`${label}: JSON yanıtının sonunda fazladan veri ayıklandı.`);return value}catch{}}}}throw Error(`${label}: JSON yanıtı geçersiz (${first.message}).`)}}
+function parseJSONText(raw,label='Server'){
+  const text=String(raw??'').trim();
+  try{return JSON.parse(text)}catch(first){
+    // Some installed proxy/runtime combinations prepend a literal (usually
+    // `null`) or append a second response. Recover the first complete object
+    // or array so login and the following API calls can still use the server
+    // response instead of surfacing a browser JSON.parse error.
+    let depth=0,start=-1,inString=false,escaped=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(inString){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch==='"')inString=false;continue}
+      if(ch==='"'){inString=true;continue}
+      if(ch==='{'||ch==='['){if(depth===0)start=i;depth++}
+      else if(ch==='}'||ch===']'){depth--;if(depth===0&&start>=0){try{const value=JSON.parse(text.slice(start,i+1));console.warn(`${label}: JSON yanıtının çevresindeki fazladan veri ayıklandı.`);return value}catch{}}}
+    }
+    const literal=/^(null|true|false)(?=$|[^A-Za-z0-9_$])/.exec(text);
+    if(literal){const tail=text.slice(literal[0].length).trim();if(!tail)return JSON.parse(literal[0]);try{const value=parseJSONText(tail,label);console.warn(`${label}: JSON yanıtının başındaki fazladan veri ayıklandı.`);return value}catch{}}
+    throw Error(`${label}: JSON yanıtı geçersiz (${first.message}).`)
+  }
+}
 async function responseJSON(r,label){return parseJSONText(await r.text(),label)}
 function api(path,opt={}){const headers={'Content-Type':'application/json',...(opt.headers||{})};if(S.token)headers.Authorization=`Bearer ${S.token}`;headers['X-EBS-Client-Mode']=S.runtime?.client==='customer'?'customer':'staff';return fetch(path,{...opt,headers}).then(async r=>{const ct=r.headers.get('content-type')||'';const d=ct.includes('json')?await responseJSON(r,path):await r.text();if(r.status===401&&path!='/api/login'){logout(false);throw Error('Oturum süresi doldu.')};if(!r.ok){if(r.status===404)throw Error('İlgili işlem servisi bu Server sürümünde bulunamadı. Server işlem motoru doğrulanıp yeniden başlatılmalıdır.');throw Error(d?.error||d?.message||`İşlem başarısız (${r.status})`)};return d})}
 const post=(p,b)=>api(p,{method:'POST',body:JSON.stringify(b)});
