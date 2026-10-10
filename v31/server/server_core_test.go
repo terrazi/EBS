@@ -1,13 +1,48 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 )
+
+func TestCentralLoginReturnsV3SessionToken(t *testing.T) {
+	stop := make(chan struct{})
+	srv := newHTTPServer(stop)
+	ts := httptest.NewServer(srv.Handler)
+	defer ts.Close()
+	close(stop)
+
+	resp, err := http.Post(ts.URL+"/api/login", "application/json", bytes.NewBufferString(`{"username":"gise01","password":"1234"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var out map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		t.Fatal(err)
+	}
+	v3, _ := out["v3_token"].(string)
+	if resp.StatusCode != http.StatusOK || v3 == "" {
+		t.Fatalf("combined login status=%d response=%v", resp.StatusCode, out)
+	}
+	req, _ := http.NewRequest(http.MethodGet, ts.URL+"/v3api/api/v3/session", nil)
+	req.Header.Set("Authorization", "Bearer "+v3)
+	check, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer check.Body.Close()
+	if check.StatusCode != http.StatusOK {
+		t.Fatalf("v3 session status=%d", check.StatusCode)
+	}
+}
 
 func TestCentralHostedUIAndLegacyProxy(t *testing.T) {
 	legacyMux := http.NewServeMux()

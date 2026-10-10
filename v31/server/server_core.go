@@ -303,6 +303,41 @@ func clientModeFromRequest(r *http.Request) string {
 	}
 }
 
+// centralAPIHandler keeps the compatibility login response and the durable
+// v3 session in one response. This prevents a proxy or old gateway from
+// corrupting the second, browser-side v3 login request.
+func centralAPIHandler(engine *sim.Engine, legacy http.Handler) http.Handler {
+	compat := fb.apiHandler(legacy)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if engine == nil || r.URL.Path != "/api/login" || r.Method != http.MethodPost {
+			compat.ServeHTTP(w, r)
+			return
+		}
+		var in struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
+			jsonOut(w, http.StatusBadRequest, map[string]string{"message": "Geçerli bir giriş JSON gövdesi gerekli."})
+			return
+		}
+		tok, u, ok := fb.login(in.Username, in.Password)
+		if !ok {
+			jsonOut(w, http.StatusUnauthorized, map[string]string{"message": "Kullanıcı adı veya şifre hatalı."})
+			return
+		}
+		out := authResponse(tok, u)
+		// "web" deliberately accepts every demo role; the client-specific role
+		// check remains enforced by the v3 login engine and the UI.
+		if v3, err := engine.Login(in.Username, in.Password, "web"); err == nil {
+			if token, ok := v3["token"].(string); ok && token != "" {
+				out["v3_token"] = token
+			}
+		}
+		jsonOut(w, http.StatusOK, out)
+	})
+}
+
 func v3APIMux(store *Store) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
@@ -543,12 +578,14 @@ func discoveryResponder(stop <-chan struct{}) {
 func newHTTPServer(stop <-chan struct{}) *http.Server {
 	store := newStore()
 	v3mux := v3APIMux(store)
+	var engine *sim.Engine
 	// The durable simulator engine is initialized once for the central service.
 	// The preserved v3 event API remains mounted for compatibility, while new
 	// clients use the authenticated transactional /v3api/api/v3 endpoints.
-	if engine, err := sim.Open(filepath.Join(programData(), "ebs-v31.sqlite3")); err != nil {
+	if opened, err := sim.Open(filepath.Join(programData(), "ebs-v31.sqlite3")); err != nil {
 		log.Printf("v3 simulation engine unavailable: %v", err)
 	} else {
+		engine = opened
 		installSimulationAPI(v3mux, engine)
 	}
 	legacy := legacyProxy()
@@ -616,7 +653,7 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 
 	// The preserved v1 core remains the real banking/sigorta transaction source.
 	// It is proxied by the central Server so remote clients never see 127.0.0.1.
-	mux.Handle("/api/", fb.apiHandler(legacy))
+	mux.Handle("/api/", centralAPIHandler(engine, legacy))
 	mux.Handle("/legacy/", legacy)
 	mux.Handle("/web/", legacy)
 
