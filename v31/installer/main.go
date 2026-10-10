@@ -332,8 +332,14 @@ func installServer() (string, error) {
 	cmd := filepath.Join(srv, "EBS_Server_Baslat.cmd")
 	script := "@echo off\r\n" +
 		"cd /d \"%~dp0\"\r\n" +
+		"rem EBSv3ProService is configured for automatic start. Never launch a second\r\n" +
+		"rem --console instance at logon; two engines can lock the SQLite database.\r\n" +
+		"sc query EBSv3ProService >nul 2>&1\r\n" +
+		"if not errorlevel 1 (\r\n" +
+		"  sc start EBSv3ProService >nul 2>&1\r\n" +
+		"  exit /b 0\r\n" +
+		")\r\n" +
 		"start \"\" /min \"%~dp0EBS_v3_Service.exe\" --console\r\n" +
-		"if exist \"%~dp0EBS_Core_Server.exe\" start \"\" /min \"%~dp0EBS_Core_Server.exe\"\r\n" +
 		"exit /b 0\r\n"
 	_ = os.WriteFile(cmd, []byte(script), 0644)
 	ico := filepath.Join(rootDir(), "Icons", "EBS_Server.ico")
