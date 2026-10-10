@@ -1,0 +1,381 @@
+package main
+
+import (
+	"encoding/json"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"syscall"
+	"time"
+	"unsafe"
+)
+
+var clientMode = "personnel" // admin | personnel | customer
+
+const fullName = "ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ"
+const productName = "BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU"
+
+func u16(s string) *uint16 { p, _ := syscall.UTF16PtrFromString(s); return p }
+
+func messageBox(title, text string, flags uintptr) {
+	p := syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW")
+	p.Call(0, uintptr(unsafe.Pointer(u16(text))), uintptr(unsafe.Pointer(u16(title))), flags)
+}
+
+func programDataDir() string {
+	p := os.Getenv("ProgramData")
+	if p == "" {
+		p = os.TempDir()
+	}
+	return filepath.Join(p, "EBS Bankacilik ve Sigortacilik")
+}
+
+func installRoot() string {
+	p := os.Getenv("ProgramFiles")
+	if p == "" {
+		p = `C:\Program Files`
+	}
+	return filepath.Join(p, "EBS Bankacilik ve Sigortacilik")
+}
+
+var urlRe = regexp.MustCompile(`https?://[^\s\x00\r\n]+`)
+
+func trimURL(s string) string {
+	return strings.TrimRight(strings.TrimSpace(s), `/"',;}`)
+}
+
+func readURLFile(path string) string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	if m := urlRe.Find(b); len(m) > 0 {
+		return trimURL(string(m))
+	}
+	var x map[string]any
+	if json.Unmarshal(b, &x) == nil {
+		for _, k := range []string{"v3_url", "server_url", "url", "public_url"} {
+			if s, ok := x[k].(string); ok && strings.HasPrefix(strings.ToLower(s), "http") {
+				return trimURL(s)
+			}
+		}
+	}
+	return ""
+}
+
+func savedV3URL() string {
+	for _, p := range []string{
+		filepath.Join(programDataDir(), "v3_server_url.txt"),
+		filepath.Join(programDataDir(), "server_v3_url.txt"),
+	} {
+		if s := readURLFile(p); s != "" {
+			if u, e := url.Parse(s); e == nil && u.Port() == "8792" {
+				return trimURL(s)
+			}
+			return deriveV3(s)
+		}
+	}
+	return ""
+}
+
+func legacySavedURL() string {
+	for _, p := range []string{
+		filepath.Join(programDataDir(), "EBS_Server_Baglantisi.ebs"),
+		filepath.Join(programDataDir(), "server_url.txt"),
+		filepath.Join(programDataDir(), "server_config.json"),
+	} {
+		if s := readURLFile(p); s != "" {
+			return s
+		}
+	}
+	return ""
+}
+
+func saveV3URL(s string) {
+	if s == "" {
+		return
+	}
+	_ = os.MkdirAll(programDataDir(), 0755)
+	_ = os.WriteFile(filepath.Join(programDataDir(), "v3_server_url.txt"), []byte(trimURL(s)+"\r\n"), 0644)
+}
+
+func deriveV3(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.Hostname() == "" {
+		return ""
+	}
+	host := u.Hostname()
+	if host == "127.0.0.1" && clientMode != "admin" {
+		return ""
+	}
+	return "http://" + net.JoinHostPort(host, "8792")
+}
+
+func healthOK(base string) bool {
+	if base == "" {
+		return false
+	}
+	c := &http.Client{Timeout: 1300 * time.Millisecond}
+	resp, err := c.Get(trimURL(base) + "/health")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode >= 200 && resp.StatusCode < 300
+}
+
+func waitHealth(base string, d time.Duration) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if healthOK(base) {
+			return true
+		}
+		time.Sleep(350 * time.Millisecond)
+	}
+	return healthOK(base)
+}
+
+func localServerURL() string {
+	// Prefer a real LAN address so the browser never depends on a loopback page.
+	ifaces, _ := net.Interfaces()
+	var fallback string
+	for _, it := range ifaces {
+		if it.Flags&net.FlagUp == 0 || it.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, _ := it.Addrs()
+		for _, a := range addrs {
+			var ip net.IP
+			switch v := a.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			ip4 := ip.To4()
+			if ip4 == nil || ip4.IsLoopback() || ip4[0] == 169 && ip4[1] == 254 {
+				continue
+			}
+			u := "http://" + net.JoinHostPort(ip4.String(), "8792")
+			if ip4[0] == 10 || ip4[0] == 192 && ip4[1] == 168 || ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31 {
+				return u
+			}
+			if fallback == "" {
+				fallback = u
+			}
+		}
+	}
+	if fallback != "" {
+		return fallback
+	}
+	return "http://localhost:8792"
+}
+
+func startIfExists(path string) {
+	if _, err := os.Stat(path); err == nil {
+		cmd := exec.Command(path)
+		cmd.Dir = filepath.Dir(path)
+		_ = cmd.Start()
+	}
+}
+
+func ensureAdminServices() {
+	if clientMode != "admin" {
+		return
+	}
+	// Önce Windows servisini başlat. Bazı Windows/Defender yapılandırmalarında
+	// servis kaydı mevcut olsa bile ilk başlangıç gecikebilir; bu durumda aynı
+	// binary normal arka plan süreci olarak çalıştırılır.
+	_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
+	local := "http://localhost:8792"
+	if !waitHealth(local, 2500*time.Millisecond) {
+		srv := filepath.Join(installRoot(), "Server")
+		p := filepath.Join(srv, "EBS_v3_Service.exe")
+		if _, err := os.Stat(p); err == nil {
+			c := exec.Command(p, "--console")
+			c.Dir = srv
+			_ = c.Start()
+			_ = waitHealth(local, 4500*time.Millisecond)
+		}
+	}
+
+	// Korunan v1 işlem motorunun yaşam döngüsünü merkezi v3 Server yönetir.
+	// Client tarafından iki farklı legacy süreç başlatılmaz; bu yaklaşım 8787
+	// üzerinde yanlış/stale listener oluşmasını ve API 404 hatalarını önler.
+}
+
+func discover(port int, probe string, timeout time.Duration) string {
+	conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
+	if err != nil {
+		return ""
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(timeout))
+	_ = conn.SetWriteBuffer(2048)
+	_ = conn.SetReadBuffer(4096)
+	_, _ = conn.WriteToUDP([]byte(probe), &net.UDPAddr{IP: net.IPv4bcast, Port: port})
+	buf := make([]byte, 4096)
+	for {
+		n, _, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			return ""
+		}
+		msg := strings.TrimSpace(string(buf[:n]))
+		if m := urlRe.FindString(msg); m != "" {
+			return trimURL(m)
+		}
+	}
+}
+
+func normalizeServerInput(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	if !strings.Contains(raw, "://") {
+		raw = "http://" + raw
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Hostname() == "" {
+		return ""
+	}
+	host := u.Hostname()
+	if clientMode != "admin" && (host == "127.0.0.1" || strings.EqualFold(host, "localhost")) {
+		return ""
+	}
+	return "http://" + net.JoinHostPort(host, "8792")
+}
+
+func promptServerAddress() string {
+	if clientMode == "admin" {
+		return ""
+	}
+	script := `$ErrorActionPreference='SilentlyContinue'; Add-Type -AssemblyName Microsoft.VisualBasic; $x=[Microsoft.VisualBasic.Interaction]::InputBox('EBS Server otomatik bulunamadı. Server bilgisayarının IP adresini veya bilgisayar adını girin. Örnek: 192.168.1.25','EBS Server Bağlantısı',''); if($x){[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; Write-Output $x}`
+	out, err := exec.Command("powershell.exe", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-Command", script).Output()
+	if err != nil {
+		return ""
+	}
+	candidate := normalizeServerInput(strings.TrimSpace(string(out)))
+	if candidate != "" && waitHealth(candidate, 5*time.Second) {
+		saveV3URL(candidate)
+		return candidate
+	}
+	if candidate != "" {
+		messageBox(fullName+" — Server Bağlantısı", "Girilen Server adresine ulaşılamadı:\n"+candidate+"\n\nServer bilgisayarında Admin tam kurulumunun tamamlandığını ve TCP 8792 portunun açık olduğunu kontrol edin.", 0x10)
+	}
+	return ""
+}
+
+func resolveV3URL() string {
+	if s := os.Getenv("EBS_V3_URL"); s != "" {
+		s = trimURL(s)
+		if healthOK(s) {
+			saveV3URL(s)
+			return s
+		}
+	}
+
+	ensureAdminServices()
+	if clientMode == "admin" {
+		localHealth := "http://localhost:8792"
+		if waitHealth(localHealth, 12*time.Second) {
+			publicLocal := localServerURL()
+			if healthOK(publicLocal) {
+				saveV3URL(publicLocal)
+				return publicLocal
+			}
+			// Firewall/LAN profile can occasionally reject the machine's own LAN address
+			// even while the local service is healthy. "localhost" remains a valid final
+			// fallback; the browser is never sent to a numeric 127.0.0.1 page.
+			saveV3URL(localHealth)
+			return localHealth
+		}
+	}
+
+	if s := savedV3URL(); s != "" && healthOK(s) {
+		return s
+	}
+	if s := legacySavedURL(); s != "" {
+		if v := deriveV3(s); v != "" && healthOK(v) {
+			saveV3URL(v)
+			return v
+		}
+	}
+
+	// Aynı bilgisayarda Server çalışıyorsa rol ne olursa olsun doğrudan kullan.
+	// Bu deneme uzak istemcide yalnız kısa bir timeout maliyetine sahiptir ve
+	// Admin ile birlikte kurulan Personel/Müşteri Client'ların bağlantısını kararlı yapar.
+	local := "http://localhost:8792"
+	if waitHealth(local, 1800*time.Millisecond) {
+		saveV3URL(local)
+		return local
+	}
+
+	// New v3 discovery channel.
+	if s := discover(8793, "EBS_V3_DISCOVER", 2200*time.Millisecond); s != "" && healthOK(s) {
+		saveV3URL(s)
+		return s
+	}
+
+	// Compatibility: discover the old 8787 gateway and convert its host to the v3 service.
+	if s := discover(8788, "EBS_DISCOVER", 1800*time.Millisecond); s != "" {
+		if v := deriveV3(s); v != "" && healthOK(v) {
+			saveV3URL(v)
+			return v
+		}
+	}
+	if s := promptServerAddress(); s != "" {
+		return s
+	}
+	return ""
+}
+
+func edgePath() string {
+	candidates := []string{
+		filepath.Join(os.Getenv("ProgramFiles(x86)"), "Microsoft", "Edge", "Application", "msedge.exe"),
+		filepath.Join(os.Getenv("ProgramFiles"), "Microsoft", "Edge", "Application", "msedge.exe"),
+	}
+	for _, p := range candidates {
+		if p != "" {
+			if _, e := os.Stat(p); e == nil {
+				return p
+			}
+		}
+	}
+	if p, e := exec.LookPath("msedge.exe"); e == nil {
+		return p
+	}
+	return ""
+}
+
+func openApp(base string) error {
+	mode := url.QueryEscape(clientMode)
+	appURL := trimURL(base) + "/ui/?client=" + mode
+	if p := edgePath(); p != "" {
+		return exec.Command(p, "--app="+appURL, "--start-maximized", "--no-first-run", "--disable-features=msEdgeSidebarV2").Start()
+	}
+	return exec.Command("cmd.exe", "/c", "start", "", appURL).Start()
+}
+
+func main() {
+	base := resolveV3URL()
+	if base == "" {
+		role := map[string]string{"admin": "Admin", "personnel": "Personel", "customer": "Müşteri"}[clientMode]
+		detail := ""
+		if clientMode == "admin" {
+			detail = "\n\nAdmin bilgisayarında EBS Server servisinin kurulmuş ve çalışıyor olması gerekir. Kurulum paketindeki “EBS_Admin_TAM_Kurulum_v3.0_PRO.exe” dosyasını yönetici olarak yeniden çalıştırın."
+		} else {
+			detail = "\n\nBu bilgisayar Server bilgisayarı değildir. Aynı yerel ağa bağlı olduğunuzu ve Server bilgisayarında Admin tam kurulumunun yapıldığını kontrol edin. Program artık bağlantı bulunamadığında 127.0.0.1 adresini açmaz."
+		}
+		messageBox(fullName+" — "+role, "EBS merkezi Server bulunamadı."+detail, 0x10)
+		return
+	}
+	if err := openApp(base); err != nil {
+		messageBox(fullName, "Program ekranı açılamadı:\n"+err.Error()+"\n\nServer: "+base, 0x10)
+	}
+}

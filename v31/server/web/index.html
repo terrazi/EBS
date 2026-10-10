@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="/icon.ico">
+  <link rel="stylesheet" href="/styles.css">
+  <title>ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ — Bankacılık ve Sigortacılık Eğitim Simülasyonu</title>
+</head>
+<body>
+  <div id="login" class="login-shell">
+    <section class="login-hero">
+      <div class="hero-mesh"></div>
+      <div class="hero-inner">
+        <div class="brand-line"><img src="/icon.ico" alt=""><div><strong>ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ</strong><span>BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU • v3.0 PRO</span></div></div>
+        <div id="staffHero" class="hero-copy">
+          <div class="hero-kicker">GERÇEKÇİ BANKA VE SİGORTA OPERASYON DENEYİMİ</div>
+          <h1>Bankacılık ve sigortacılık işlemlerini uçtan uca yöneten eğitim ortamı</h1>
+          <p>Müşteri, hesap, gişe, transfer, kredi, kart, poliçe ve hasar süreçlerini gerçek çalışma düzenine benzer, anlaşılır ve görev odaklı ekranlarla yürüten eğitim ortamı.</p>
+          <div class="feature-row"><span>Müşteri 360°</span><span>Gişe ve Transfer</span><span>Kredi ve Kart</span><span>Poliçe ve Hasar</span><span>İşler ve Onaylar</span></div>
+        </div>
+        <div id="customerHero" class="customer-hero hidden">
+          <div class="hero-kicker">MÜŞTERİ İNTERNET ŞUBESİ • EĞİTİM ORTAMI</div>
+          <h1>Bankacılık ve sigortacılık tek müşteri profilinde</h1>
+          <div class="campaign-grid">
+            <div class="campaign campaign-main"><small>KARTLAR</small><strong>Günlük harcamalarınızı tek ekrandan yönetin</strong><span>Kartlarım • Ekstre • Servis talepleri</span></div>
+            <div class="campaign"><small>KREDİ</small><strong>İhtiyaçlarınız için eğitim kredisi</strong><span>Başvuru • Ödeme planı • Servis</span></div>
+            <div class="campaign"><small>SİGORTA</small><strong>Poliçeleriniz yanınızda</strong><span>Teklif • Prim • Hasar takibi</span></div>
+          </div>
+        </div>
+        <div class="training-ribbon">EĞİTİM AMAÇLIDIR — GERÇEK FİNANSAL İŞLEM ÜRETMEZ</div>
+      </div>
+    </section>
+    <section class="login-panel-wrap">
+      <div class="login-panel">
+        <div class="role-badge" id="loginRoleBadge">PERSONEL CLIENT</div>
+        <h2 id="loginTitle">ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ</h2>
+        <p id="loginSub">Yetkili kullanıcı bilgilerinizle giriş yapın.</p>
+        <form id="loginForm" class="form-stack">
+          <label><span id="userLabel">Kullanıcı adı</span><input id="username" autocomplete="username" required></label>
+          <label><span>Şifre</span><input id="password" type="password" autocomplete="current-password" required></label>
+          <button class="btn primary xl" type="submit">Güvenli Giriş</button>
+        </form>
+        <div id="loginError" class="alert danger hidden"></div>
+        <div class="login-status"><div><span>Server</span><strong id="serverState">Bağlantı kontrol ediliyor…</strong></div><div><span>Sürüm</span><strong>v3.0 PRO</strong></div></div>
+        <div class="training-note">Bu yazılım eğitim/simülasyon amaçlıdır. Gerçek banka veya sigorta sistemlerine bağlanmaz.</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="app" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="side-brand"><img src="/icon.ico" alt=""><div><strong>ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ</strong><span>BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU</span><small id="sideRole">v3.0 PRO</small></div></div>
+      <div class="side-search"><input id="menuSearch" placeholder="İşlem veya ekran ara…"></div>
+      <nav id="nav" class="nav"></nav>
+      <div class="side-bottom">
+        <button class="btn ghost full" id="legacyHomeBtn">Mevcut EBS İşlem Motoru</button>
+        <button class="btn ghost full" id="logoutBtn">Oturumu Kapat</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button id="menuBtn" class="icon-btn mobile">☰</button>
+        <div class="title-stack"><span id="crumb">v3.0 PRO</span><h2 id="pageTitle">Çalışma Alanı</h2></div>
+        <div class="top-actions">
+          <div class="global-search"><input id="globalSearch" placeholder="Müşteri / TCKN / hesap / poliçe / ekran ara…"><kbd>Enter</kbd></div>
+          <div class="server-pill"><i></i><span id="healthText">Server</span></div>
+          <div class="user-chip"><div class="avatar" id="avatar">E</div><div><strong id="userName">Kullanıcı</strong><span id="userRole">Rol</span></div></div>
+        </div>
+      </header>
+      <section id="contextBar" class="context-bar">
+        <div><span>ŞUBE</span><strong id="branch">1001 • Erbaa Eğitim Şubesi</strong></div>
+        <div><span>İŞ GÜNÜ</span><strong id="businessDate">—</strong></div>
+        <div><span>CLIENT</span><strong id="clientName">—</strong></div>
+        <div class="grow"><span>AKTİF BAĞLAM</span><strong id="contextText">Bağlam seçilmedi</strong></div>
+      </section>
+      <section id="content" class="workspace"><div class="loading">Yükleniyor…</div></section>
+      <footer class="statusbar"><span><i class="dot"></i> Merkezi Server/API</span><span id="statusUser">—</span><span class="grow"></span><strong>ERBAA BANKACILIK VE SİGORTACILIK HİZMETLERİ</strong><span>v3.0 PRO</span></footer>
+    </main>
+  </div>
+  <div id="toast"></div>
+  <div id="modal"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

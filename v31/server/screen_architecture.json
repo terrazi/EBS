@@ -1,0 +1,1856 @@
+[
+  {
+    "code": "ADM-001",
+    "client": "admin",
+    "module": "Admin Ortak Kabuk",
+    "title": "Admin Giriş",
+    "parent": "admin-shell",
+    "presentation": "client_shell",
+    "visible_primary": false
+  },
+  {
+    "code": "ADM-002",
+    "client": "admin",
+    "module": "Admin Ortak Kabuk",
+    "title": "Çalışma Alanı Seçimi",
+    "parent": "admin-shell",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ADM-003",
+    "client": "admin",
+    "module": "Admin Ortak Kabuk",
+    "title": "Global Üst Çubuk",
+    "parent": "admin-shell",
+    "presentation": "background_or_context",
+    "visible_primary": false
+  },
+  {
+    "code": "ADM-004",
+    "client": "admin",
+    "module": "Admin Ortak Kabuk",
+    "title": "Global Arama",
+    "parent": "admin-shell",
+    "presentation": "background_or_context",
+    "visible_primary": false
+  },
+  {
+    "code": "ABM-001",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Yönetim Dashboard",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": false
+  },
+  {
+    "code": "ABM-010",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Organizasyon Ağacı",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-011",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Şube Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-012",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Departman Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-013",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Personel Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-014",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Rol & Yetki",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-015",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Vekâlet",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-016",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Yetki & Onay Matrisi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-020",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Ürün/Tarife Ana Sayfa",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-021",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Mevduat Ürünleri",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-022",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kredi Ürünleri",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-023",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kart Ürünleri",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-024",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kur Tablosu",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-025",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Transfer/Ücret Parametreleri",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-026",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Sigorta Ürün/Tarifeleri",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-027",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Belge Matrisi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-030",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Merkezi İş Havuzu Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-031",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Onay Havuzu",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-032",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Operasyon İstisnaları",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-040",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Gişe Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-041",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kredi Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-042",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kart Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-043",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Sigorta Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-044",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Hasar Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-050",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Mutabakat Merkezi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-060",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "İşletme Raporları",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-061",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Audit / Denetim Merkezi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-062",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Ayarlar / Kurumsal Kimlik",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "ABM-063",
+    "client": "admin",
+    "module": "Banka & Sigorta Yönetimi",
+    "title": "Kullanıcı Kimliği / Şifre Yönetimi",
+    "parent": "admin-banking",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-001",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Eğitim Dashboard",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": false
+  },
+  {
+    "code": "AES-010",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Senaryo Kataloğu",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-011",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Senaryo Tasarım Sihirbazı",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-012",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Öğrenci/Personel Atama",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-013",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Canlı Sınıf",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-014",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Sınav Modu",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-015",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Değerlendirme",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-016",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Snapshot Yönetimi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-017",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Demo Veri Sıfırlama",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-020",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Sistem Sağlığı",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-021",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Client & Ağ Yönetimi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-022",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Server/Port Durumu",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-023",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Yedekleme",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-024",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Geri Yükleme",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-025",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Sürüm & Migration",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-026",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Sistem Olayları",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-027",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Tanılama Paketi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-028",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Kurulum Sağlık Geçmişi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-018",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Senaryo / Görev Toplu Atama",
+    "parent": "scenarioAssign",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-019",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Senaryo Müşteri Havuzu",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-029",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "İç Mesaj & Görev Merkezi",
+    "parent": "messages",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-030",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Mesaj Şablonları",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-031",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Mesaj Kullanıcı Grupları",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-032",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Mesaj Arşivi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "AES-033",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Erişim / Terminal Kontrol",
+    "parent": "admin-training",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "AES-034",
+    "client": "admin",
+    "module": "Eğitmen & Sistem Yönetimi",
+    "title": "Rol Bazlı Yardım / Kullanım Rehberi",
+    "parent": "admin-training",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-001",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Personel Giriş",
+    "parent": "personnel-workspace",
+    "presentation": "client_shell",
+    "visible_primary": false
+  },
+  {
+    "code": "PER-002",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Operasyon Dashboard",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": false
+  },
+  {
+    "code": "PER-003",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Global Arama",
+    "parent": "personnel-workspace",
+    "presentation": "background_or_context",
+    "visible_primary": false
+  },
+  {
+    "code": "PER-004",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Bekleyen İşler / İş Listem",
+    "parent": "worklist",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-005",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Müşteri 360°",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-006",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "İşlem Geçmişi Timeline",
+    "parent": "personnel-workspace",
+    "presentation": "background_or_context",
+    "visible_primary": false
+  },
+  {
+    "code": "PER-007",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Mesajlarım / Görevlerim",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-008",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Yetkilerim",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-009",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Ekran Temam / Görünüm",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-010",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Rol Bazlı Yardım",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PER-011",
+    "client": "personnel",
+    "module": "Personel Ortak Kabuk",
+    "title": "Müşteri Talepleri Kaynak Görünümü",
+    "parent": "personnel-workspace",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-001",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Müşteri Arama & Sonuç",
+    "parent": "customer360",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CS-002",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Yeni Müşteri Sihirbazı",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-003",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "KYC / Kimlik Doğrulama",
+    "parent": "customer360",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CS-004",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Risk & Uyum Özeti",
+    "parent": "customer360",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CS-005",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Müşteri Profil Değişikliği",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-006",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Hesap Açılışı",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-007",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Kart Başvurusu Başlat",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-008",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Kredi Başvurusu Başlat",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-009",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Sigorta Teklifine Yönlendir",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-010",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Destek Talepleri",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CS-011",
+    "client": "personnel",
+    "module": "Müşteri Hizmetleri",
+    "title": "Müşteri Belgeleri",
+    "parent": "customer360",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-001",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Kasa Açılışı",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-002",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Nakit Yatırma",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-003",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Nakit Çekme",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-004",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Kasa Transferi",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-005",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Döviz/Altın Gişe",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-006",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Kasa Durumu",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-007",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Kasa Kapanışı",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "TL-008",
+    "client": "personnel",
+    "module": "Gişe / Kasa",
+    "title": "Kasa Farkı İnceleme",
+    "parent": "teller-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PM-001",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Transfer Başlat",
+    "parent": "transfers-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PM-002",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Alıcı Doğrulama",
+    "parent": "transfers-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "PM-003",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Transfer Özeti",
+    "parent": "transfers-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "PM-004",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Transfer Sonuç",
+    "parent": "transfers-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "PM-005",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Transfer İade/Geri Çağırma",
+    "parent": "transfers-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PM-006",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Kolay Adres Yönetimi",
+    "parent": "transfers-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PM-007",
+    "client": "personnel",
+    "module": "Para Transferleri",
+    "title": "Ödeme İste",
+    "parent": "transfers-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PAY-001",
+    "client": "personnel",
+    "module": "Ödemeler",
+    "title": "Fatura Borç Sorgu",
+    "parent": "payments-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PAY-002",
+    "client": "personnel",
+    "module": "Ödemeler",
+    "title": "Fatura/Tahakkuk Seçimi",
+    "parent": "payments-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PAY-003",
+    "client": "personnel",
+    "module": "Ödemeler",
+    "title": "Fatura Ödeme Özeti",
+    "parent": "payments-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "PAY-004",
+    "client": "personnel",
+    "module": "Ödemeler",
+    "title": "Otomatik Ödeme Talimatı",
+    "parent": "payments-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "PAY-005",
+    "client": "personnel",
+    "module": "Ödemeler",
+    "title": "Talimat İzleme",
+    "parent": "payments-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-001",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Kur Panosu",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-002",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Döviz Al",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-003",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Döviz Sat",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-004",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Altın Al",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-005",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Altın Sat",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "FX-006",
+    "client": "personnel",
+    "module": "Döviz / Altın",
+    "title": "Çapraz Kur",
+    "parent": "fx-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-001",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Başvuru Kuyruğu",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-002",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Başvuru Detayı",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-003",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Finansal Değerlendirme",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-004",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Belge/Tahsis Kontrol",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-005",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Tahsis Önerisi",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-006",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Onay Kararı",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-007",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Sözleşme & Belge",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-008",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Kullandırım",
+    "parent": "loans-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-009",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Detay",
+    "parent": "loans-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "LN-010",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Ödeme Planı",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-011",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Kredi Taksit Ödeme",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-012",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Erken Kapama Teklifi",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-013",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Ara Ödeme",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-014",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Yapılandırma",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "LN-015",
+    "client": "personnel",
+    "module": "Krediler",
+    "title": "Gecikmiş Krediler",
+    "parent": "loans-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CD-001",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Başvuru Kuyruğu",
+    "parent": "cards-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CD-002",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Banka Kartı Başvuru",
+    "parent": "cards-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CD-003",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kredi Kartı Değerlendirme",
+    "parent": "cards-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CD-004",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Limit Kararı",
+    "parent": "cards-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CD-005",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Üretim / Aktivasyon",
+    "parent": "cards-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CD-006",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Detay",
+    "parent": "cards-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CD-007",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Servis Merkezi",
+    "parent": "cards-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CD-008",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Kanal Ayarları",
+    "parent": "cards-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CD-009",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Ekstre Detayı",
+    "parent": "cards-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CD-010",
+    "client": "personnel",
+    "module": "Kart Operasyonları",
+    "title": "Kart Borcu Ödeme",
+    "parent": "cards-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-001",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Sigorta Teklif Kuyruğu",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-002",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Teklif Başlat",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-003",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Teminat Seçimi",
+    "parent": "insurance-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-004",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Teklif Özeti",
+    "parent": "insurance-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-005",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Bilgilendirme / Onay",
+    "parent": "insurance-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-006",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Prim Tahsilatı",
+    "parent": "insurance-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-007",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Poliçe Oluştur",
+    "parent": "insurance-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-008",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Poliçe Detay",
+    "parent": "insurance-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "IN-009",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Zeyilname",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-010",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Yenileme",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-011",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "İptal / Fesih",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-012",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Teminat/Limit/Muafiyet Değişikliği",
+    "parent": "policy-endorsement",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-013",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Poliçe Tarafları",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "IN-014",
+    "client": "personnel",
+    "module": "Sigorta",
+    "title": "Prim/Taksit Takibi",
+    "parent": "insurance-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CL-001",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar İhbar Kuyruğu",
+    "parent": "claims-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CL-002",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar İhbarı",
+    "parent": "claims-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CL-003",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar Belge Merkezi",
+    "parent": "claims-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CL-004",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Eksper Atama",
+    "parent": "claims-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-005",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "İnceleme & Rezerv",
+    "parent": "claims-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-006",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar Kararı",
+    "parent": "claims-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-007",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar Onayı",
+    "parent": "claims-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-008",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar Ödeme",
+    "parent": "claims-hub",
+    "presentation": "workflow_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-009",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Hasar Detay Timeline",
+    "parent": "claims-hub",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CL-010",
+    "client": "personnel",
+    "module": "Hasar",
+    "title": "Kapanan/Reddedilen Hasarlar",
+    "parent": "claims-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-001",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Ticari Müşteri Arama",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-002",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Ticari Müşteri/KYC",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-003",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Çek/Senet Portföyü",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-004",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Çek/Senet Servis",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-005",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Teminat Yönetimi",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CM-006",
+    "client": "personnel",
+    "module": "Ticari Bankacılık",
+    "title": "Ticari Kredi",
+    "parent": "commercial-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "DOC-001",
+    "client": "personnel",
+    "module": "Belge / Operasyon",
+    "title": "Belge Merkezi",
+    "parent": "documents-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "DOC-002",
+    "client": "personnel",
+    "module": "Belge / Operasyon",
+    "title": "Şablondan Belge Oluştur",
+    "parent": "documents-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "DOC-003",
+    "client": "personnel",
+    "module": "Belge / Operasyon",
+    "title": "Eksik Belge Kuyruğu",
+    "parent": "documents-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "DOC-004",
+    "client": "personnel",
+    "module": "Belge / Operasyon",
+    "title": "Belge İnceleme",
+    "parent": "documents-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CTL-001",
+    "client": "personnel",
+    "module": "Onay / Kontrol",
+    "title": "Operasyon Onay Havuzu",
+    "parent": "approvals-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CTL-002",
+    "client": "personnel",
+    "module": "Onay / Kontrol",
+    "title": "Mutabakat Farkları",
+    "parent": "approvals-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CTL-003",
+    "client": "personnel",
+    "module": "Onay / Kontrol",
+    "title": "Yetki Aşımı İşleri",
+    "parent": "approvals-hub",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-001",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Müşteri Giriş",
+    "parent": "customer-home",
+    "presentation": "client_shell",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-002",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Ana Sayfa",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-003",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hesaplarım",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-004",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hesap Detay",
+    "parent": "customer-home",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-005",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hesap Açılış Talebi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-006",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Para Gönder Sihirbazı",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-007",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Transferlerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-008",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Ödemeler",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-009",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Döviz & Altın",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-010",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kartlarım",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-011",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kart Detay",
+    "parent": "customer-home",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-012",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kart Servis Talepleri",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-013",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kredilerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-014",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kredi Başvurusu",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-015",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kredi Servis",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-016",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Poliçelerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-017",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Poliçe Detay",
+    "parent": "customer-home",
+    "presentation": "tab_or_step",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-018",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Sigorta Teklifi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-019",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Zeyil/Yenile/İptal Talebi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-020",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hasar Bildir",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-021",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hasar Dosyam",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-022",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Belgelerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-023",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Destek Taleplerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-024",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Bildirim Merkezi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-025",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Profil & Talepler",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-026",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Güvenlik / Oturum",
+    "parent": "customer-home",
+    "presentation": "background_or_context",
+    "visible_primary": false
+  },
+  {
+    "code": "CUS-027",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "ATM / Nakit Eğitim Kanalı",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-028",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hesap Kapatma Talebi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-029",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Kolay Adreslerim",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-030",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Ödeme İste",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-031",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Otomatik Ödeme Talimatlarım",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-032",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Poliçe Prim / Taksit Ödeme",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-033",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Sigorta Asistans / Bilgi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-034",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Hasar Takip Talebi",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "CUS-035",
+    "client": "customer",
+    "module": "Müşteri Portalı",
+    "title": "Görünüm / Ekran Teması",
+    "parent": "customer-home",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "COM-001",
+    "client": "common",
+    "module": "Ortak",
+    "title": "Yardım",
+    "parent": "help",
+    "presentation": "screen",
+    "visible_primary": true
+  },
+  {
+    "code": "COM-002",
+    "client": "common",
+    "module": "Ortak",
+    "title": "Yazılım Hakkında",
+    "parent": "help",
+    "presentation": "screen",
+    "visible_primary": true
+  }
+]
