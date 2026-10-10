@@ -156,6 +156,9 @@ func Cards(tx *sql.Tx, u User, op string, p Payload) (Result, error) {
 		if err := KYC(tx, u, customerID); err != nil {
 			return nil, err
 		}
+		if err := RequireDocument(tx, u, p, customerID, "card_application"); err != nil {
+			return nil, err
+		}
 		cardType := Str(p, "card_type")
 		if cardType == "" {
 			cardType = "Banka Kartı"

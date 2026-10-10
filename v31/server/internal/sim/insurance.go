@@ -112,6 +112,9 @@ func Insurance(tx *sql.Tx, u User, op string, p Payload) (Result, error) {
 		if _, err := Customer(tx, u, customerID); err != nil {
 			return nil, err
 		}
+		if err := RequireDocument(tx, u, p, customerID, "insurance_quote"); err != nil {
+			return nil, err
+		}
 		product := Str(p, "product")
 		if product == "" {
 			return nil, fmt.Errorf("PRODUCT: Sigorta ürünü zorunludur.")

@@ -128,7 +128,8 @@ const cardOperation={
  'LN-001':'credit.apply','LN-006':'credit.approve','LN-008':'credit.disburse','LN-011':'credit.installment_payment','LN-012':'credit.early_close','LN-013':'credit.partial_payment','LN-014':'credit.restructure',
  'CD-001':'card.apply','CD-003':'card.evaluate','CD-004':'card.approve','CD-005':'card.activate','CD-006':'card.service','CD-010':'card.payment',
  'IN-002':'insurance.quote','IN-007':'insurance.policy_issue','IN-009':'insurance.endorse','IN-010':'insurance.renew','IN-011':'insurance.cancel','IN-014':'insurance.premium_collect',
- 'CUS-006':'banking.transfer','CUS-008':'banking.bill_pay','CUS-009':'banking.fx_trade','CUS-029':'banking.easy_address_create','CUS-030':'banking.payment_request','CUS-031':'banking.autopay_create'
+ 'CUS-006':'banking.transfer','CUS-008':'banking.bill_pay','CUS-009':'banking.fx_trade','CUS-029':'banking.easy_address_create','CUS-030':'banking.payment_request','CUS-031':'banking.autopay_create',
+ 'DOC-002':'document.create'
 };
 function operationPayload(code,p){const x={...p};if(code.startsWith('FX-')||code==='CUS-009'){x.trade_type=x.trade_type||({'FX-002':'BUY','FX-003':'SELL','FX-004':'BUY','FX-005':'SELL'}[code]||'BUY')}return x}
 function formObj(f){const o={};new FormData(f).forEach((v,k)=>{if(o[k]!==undefined)o[k]=[].concat(o[k],v);else o[k]=v});return o}
@@ -227,18 +228,19 @@ const operationFields={
  'PAY-004':[['account_id','Hesap ID','number'],['institution','Kurum','text'],['upper_limit_minor','Üst limit (kuruş)','number']],
  'FX-002':[['source_account_id','TRY kaynak hesap ID','number'],['target_account_id','Döviz hesap ID','number'],['amount_minor','Döviz miktarı alt birimi','number'],['rate','Satış kuru','text']],
  'FX-003':[['source_account_id','Döviz kaynak hesap ID','number'],['target_account_id','TRY hedef hesap ID','number'],['amount_minor','Döviz miktarı alt birimi','number'],['rate','Alış kuru','text']],
- 'IN-002':[['customer_id','Müşteri ID','number'],['product','Sigorta ürünü','text'],['premium_minor','Prim (kuruş)','number']],
+ 'IN-002':[['customer_id','Müşteri ID','number'],['document_id','Sanal teklif belgesi ID','number'],['product','Sigorta ürünü','text'],['premium_minor','Prim (kuruş)','number']],
  'IN-007':[['quote_id','Teklif ID','number']],
- 'LN-001':[['customer_id','Müşteri ID','number'],['product','Kredi ürünü','text'],['principal_minor','Anapara (kuruş)','number']],
- 'CD-001':[['customer_id','Müşteri ID','number'],['card_type','Kart türü','text']],
+ 'LN-001':[['customer_id','Müşteri ID','number'],['document_id','Gelir/başvuru belgesi ID','number'],['product','Kredi ürünü','text'],['principal_minor','Anapara (kuruş)','number']],
+ 'CD-001':[['customer_id','Müşteri ID','number'],['document_id','Kart başvuru belgesi ID','number'],['card_type','Kart türü','text']],
  'CD-005':[['card_id','Kart ID','number']],
  'CUS-006':[['source_account_id','Kaynak hesap ID','number'],['target_account_id','Hedef hesap ID','number'],['amount_minor','Tutar (kuruş)','number'],['transfer_type','Transfer türü','text']],
  'CUS-008':[['account_id','Hesap ID','number'],['institution','Kurum','text'],['amount_minor','Tutar (kuruş)','number']],
  'CUS-029':[['account_id','Bağlı hesap ID','number'],['alias_type','Kolay adres türü','text'],['alias_value','Telefon/e-posta/TCKN','text']],
  'CUS-030':[['payer_customer_id','Gönderen müşteri ID','number'],['amount_minor','Tutar (kuruş)','number'],['due_at','Son tarih','date']],
- 'CUS-031':[['account_id','Kaynak hesap ID','number'],['institution','Kurum','text'],['upper_limit_minor','Üst limit (kuruş)','number']]
+ 'CUS-031':[['account_id','Kaynak hesap ID','number'],['institution','Kurum','text'],['upper_limit_minor','Üst limit (kuruş)','number']],
+ 'DOC-002':[['customer_id','Müşteri ID','number'],['document_type','Sanal belge türü','text'],['entity_type','Bağlanacak işlem türü','text'],['entity_id','Bağlanacak kayıt ID','number']]
 };
-function operationForm(code){const fields=operationFields[code]||[];if(!fields.length)return '';return `<form id="cardForm" class="form-grid operation-form" onsubmit="return false">${fields.map(([n,l,t])=>`<label class="field"><span>${esc(l)}</span><input name="${esc(n)}" type="${t}" ${t==='number'?'step="1"':''} required></label>`).join('')}</form>`}
+function operationForm(code){const fields=operationFields[code]||[];if(!fields.length)return '';const needsDoc=fields.some(([n])=>n==='document_id');return `${needsDoc?'<div class="alert info clean-note full">Bu işlem için önce DOC-002 ekranından eğitim amaçlı sanal belge üretin; belge ID\'sini aşağıdaki alana girin.</div>':''}<form id="cardForm" class="form-grid operation-form" onsubmit="return false">${fields.map(([n,l,t])=>`<label class="field"><span>${esc(l)}</span><input name="${esc(n)}" type="${t}" ${t==='number'?'step="1"':''} required></label>`).join('')}</form>`}
 async function renderCard(c){
   setTitle(c.module,titleOf(c));
   $('#contextText').textContent=friendlyPurpose(c);
@@ -250,6 +252,7 @@ async function renderCard(c){
   if(c.code==='CUS-002')return customerHome();
   const root=$('#content');root.innerHTML='<div class="loading">Ekran hazırlanıyor…</div>';
   let live=null;const ep=PAGE_ENDPOINT[c.legacy_page];if(ep){try{live=await api(ep)}catch{}}
+  if(c.code==='DOC-001'||c.code==='CUS-022'){try{live=await v3query('documents')}catch{}}
   const acts=split(c.actions).filter(Boolean);
   const safeFields=split(c.fields).filter(f=>!/KPI|state|correlation|API|ID|payload|endpoint|schema|latency|port|server|client|mevcut\/yeni değer/i.test(f));
   const actionLabel=isInfoOnly(c)?'Kayıtları Görüntüle':'İşlemi Aç';
@@ -261,10 +264,60 @@ async function renderCard(c){
   loadCardHistory(c.code);
 }
 function renderLive(x){if(x==null)return '<div class="empty">Bu ekran için ayrı bir liste verisi bulunmuyor. İşlem düğmesi üzerinden ilgili kayıt ekranına geçebilirsiniz.</div>';if(!Array.isArray(x)&&typeof x==='object'){const arrays=Object.entries(x).filter(([,v])=>Array.isArray(v));if(arrays.length)return renderTable(arrays[0][1]);return `<div class="spec-grid">${Object.entries(x).slice(0,12).map(([k,v])=>spec(labelTR(k),typeof v==='object'?JSON.stringify(v):v)).join('')}</div>`}return renderTable(arr(x))}
-function renderTable(rows){rows=arr(rows).slice(0,30);if(!rows.length)return '<div class="empty">Kayıt bulunmuyor.</div>';const keys=[...new Set(rows.flatMap(o=>Object.keys(o||{})))].filter(k=>!/(password|token|hash|secret|raw)/i.test(k)).slice(0,7);return `<div class="table-wrap"><table class="data-table"><thead><tr>${keys.map(k=>`<th>${esc(labelTR(k))}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${keys.map(k=>`<td>${esc(formatVal(r?.[k],k))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+let tableSequence=0;
+const tableSortState=Object.create(null);
+function renderTable(rows){
+  rows=arr(rows).slice(0,30);
+  if(!rows.length)return '<div class="empty">Kayıt bulunmuyor.</div>';
+  const keys=[...new Set(rows.flatMap(o=>Object.keys(o||{})))].filter(k=>!/(password|token|hash|secret|raw)/i.test(k)).slice(0,7);
+  const id=`ebs-table-${++tableSequence}`;
+  tableSortState[id]={rows,keys,criteria:[]};
+  return `<div class="table-wrap"><table class="data-table" id="${id}" data-sortable="true"><thead><tr>${keys.map(k=>`<th class="sortable" role="button" tabindex="0" data-sort-key="${esc(k)}" onclick="EBS.sortTable('${id}','${esc(k)}',event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();EBS.sortTable('${id}','${esc(k)}',event)}">${esc(labelTR(k))}<span class="sort-mark" aria-hidden="true"></span></th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr data-row-index="${i}">${keys.map(k=>`<td>${esc(formatVal(r?.[k],k))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+}
+function sortValue(v){
+  if(v==null)return {empty:true,text:''};
+  if(typeof v==='number')return {number:v,text:String(v)};
+  const text=String(v).trim();
+  if(!text)return {empty:true,text:''};
+  const numeric=text.replace(/\s/g,'').replace(/\.(?=\d{3}(?:\D|$))/g,'').replace(',','.');
+  if(/^-?\d+(?:\.\d+)?$/.test(numeric))return {number:Number(numeric),text};
+  const date=Date.parse(text);
+  if(!Number.isNaN(date)&&/[T:/-]/.test(text))return {number:date,text};
+  return {text:text.toLocaleLowerCase('tr-TR')};
+}
+function sortTable(id,key,event={}){
+  const state=tableSortState[id], table=document.getElementById(id);
+  if(!state||!table)return;
+  const old=state.criteria.find(x=>x.key===key);
+  const direction=old?old.direction==='asc'?'desc':'asc':'asc';
+  if(event.ctrlKey){
+    state.criteria=state.criteria.filter(x=>x.key!==key);
+    state.criteria.push({key,direction});
+  }else state.criteria=[{key,direction}];
+  const indexed=state.rows.map((row,index)=>({row,index}));
+  indexed.sort((a,b)=>{
+    for(const criterion of state.criteria){
+      const av=sortValue(a.row?.[criterion.key]),bv=sortValue(b.row?.[criterion.key]);
+      let cmp=0;
+      if(av.empty!==bv.empty)cmp=av.empty?1:-1;
+      else if(av.number!==undefined&&bv.number!==undefined)cmp=av.number-bv.number;
+      else cmp=av.text.localeCompare(bv.text,'tr-TR',{numeric:true,sensitivity:'base'});
+      if(cmp)return criterion.direction==='asc'?cmp:-cmp;
+    }
+    return a.index-b.index;
+  });
+  const tbody=table.tBodies[0];
+  tbody.innerHTML=indexed.map(({row,index})=>`<tr data-row-index="${index}">${state.keys.map(k=>`<td>${esc(formatVal(row?.[k],k))}</td>`).join('')}</tr>`).join('');
+  table.querySelectorAll('th[data-sort-key]').forEach(th=>{
+    const c=state.criteria.find(x=>x.key===th.dataset.sortKey);
+    th.classList.toggle('sorted',!!c);th.dataset.sortDirection=c?.direction||'';
+    const marker=th.querySelector('.sort-mark');
+    if(marker)marker.textContent=c?`${c.direction==='asc'?'▲':'▼'} ${state.criteria.indexOf(c)+1}`:'';
+  });
+}
 function formatVal(v,k=''){if(v==null)return'';if(typeof v==='boolean')return v?'Evet':'Hayır';if(Array.isArray(v))return v.slice(0,3).map(x=>typeof x==='object'?JSON.stringify(x):x).join(', ');if(typeof v==='object')return JSON.stringify(v);let s=String(v);if(/status|durum/i.test(k)){const m={pending:'Bekliyor',open:'Açık',closed:'Kapalı',completed:'Tamamlandı',approved:'Onaylandı',rejected:'Reddedildi',active:'Aktif',inactive:'Pasif',new:'Yeni',in_progress:'İşlemde'};s=m[s.toLowerCase()]||s}return s}
 async function loadCardHistory(code){const h=$('#cardHistory');if(!h)return;try{const x=await api(`/v3api/api/card/${encodeURIComponent(code)}`);const rows=arr(x);if(!rows.length)return;h.innerHTML=`<div class="section-title"><h4>v3.0 PRO İşlem Geçmişi</h4></div><div class="card">${renderTable(rows)}</div>`}catch{}}
-async function cardAction(code,action,critical){const form=$('#cardForm');const operation=cardOperation[code];const payload=operationPayload(code,form?formObj(form):{});try{if(!operation){throw Error('Bu ekranın gerçek işlem akışı henüz bağlanmadı; işlem başarılı gösterilmedi.')}const x=await realOperation(operation,payload);toast(`${action} tamamlandı. Referans: ${x.reference||'oluşturuldu'}`);loadCardHistory(code)}catch(e){toast(`Merkezi işlem: ${e.message}`,true)}}
+async function cardAction(code,action,critical){const form=$('#cardForm');const operation=cardOperation[code];if(form&&!form.checkValidity()){form.reportValidity();return}const payload=operationPayload(code,form?formObj(form):{});try{if(!operation){throw Error('Bu ekranın gerçek işlem akışı henüz bağlanmadı; işlem başarılı gösterilmedi.')}const x=await realOperation(operation,payload);toast(`${action} tamamlandı. Referans: ${x.reference||'oluşturuldu'}`);loadCardHistory(code)}catch(e){toast(`Merkezi işlem: ${e.message}`,true)}}
 
 async function renderWorklist(){S.page='PER-004';renderNav();setTitle('İşlerim','Bekleyen İşler / İş Listem');$('#contextText').textContent='Müşteri, senaryo, admin/personel ve onay kaynaklı merkezi iş havuzu';const root=$('#content');root.innerHTML='<div class="loading">Merkezi iş havuzu yükleniyor…</div>';const [rq,as,ap,us,cs,sc]=await Promise.all([api('/api/customer-requests').catch(()=>[]),api('/api/assignments').catch(()=>[]),api('/api/approvals').catch(()=>[]),api('/api/users').catch(()=>[]),api('/api/customers?limit=5000').catch(()=>[]),api('/api/scenarios').catch(()=>[])]);const users=arr(us),cust=arr(cs),scen=arr(sc);const uname=id=>(users.find(u=>String(u.id)===String(id))||{}).full_name||id||'Atama bekliyor';const cname=id=>{const c=cust.find(x=>String(x.id)===String(id));return c?`${c.name||''} ${c.surname||''}`.trim():id||'—'};let rows=[];for(const r of arr(rq))rows.push({source:'Müşteri Talebi',id:r.id,customer:cname(r.customer_id),title:r.request_type||r.title||'Müşteri işi',assigned:uname(r.assigned_user_id),status:r.status||'Bekliyor',page:requestPage(r)});for(const a of arr(as)){const s=scen.find(x=>String(x.id)===String(a.scenario_id));rows.push({source:'Senaryo',id:a.id,customer:cname(a.customer_id||s?.customer_id),title:s?.title||a.title||'Eğitim senaryosu',assigned:uname(a.user_id||a.assigned_user_id),status:a.status||'Bekliyor',page:'scenarios'})}for(const a of arr(ap))rows.push({source:'Onay / Sistem',id:a.id,customer:cname(a.customer_id),title:a.type||a.title||'Onay işi',assigned:uname(a.approver_id||a.assigned_user_id),status:a.status||'Bekliyor',page:'approvals'});root.innerHTML=`<div class="page-head"><div><h3>Bekleyen İşler / İş Listem</h3><p>Farklı kaynaklardan gelen işleri tek merkezi havuzda izleyin; işlem açılırken doğru müşteri ve modül bağlamı korunur.</p></div><button class="btn outline" onclick="EBS.openLegacy('requests')">Mevcut İş Kuyruğunu Aç</button></div><div class="grid cols-4">${kpi('Toplam',rows.length,'Görünen işler')}${kpi('Bekleyen',rows.filter(x=>/bek|yeni|pending/i.test(x.status)).length,'İşleme alınmadı')}${kpi('İşlemde',rows.filter(x=>/işlem|devam|progress/i.test(x.status)).length,'Devam eden')}${kpi('Tamamlanan',rows.filter(x=>/tamam|onay|closed/i.test(x.status)).length,'Kapanan')}</div><div class="section-title"><h4>İş Havuzu</h4></div><div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Kaynak</th><th>Müşteri</th><th>İş / Görev</th><th>Atanan</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td><span class="status info">${esc(x.source)}</span></td><td>${esc(x.customer)}</td><td><strong>${esc(x.title)}</strong></td><td>${esc(x.assigned)}</td><td>${esc(x.status)}</td><td><button class="btn sm primary" onclick="EBS.openLegacy('${x.page}')">İşleme Al</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">İş bulunmuyor.</td></tr>'}</tbody></table></div></div>`}
 function requestPage(r){const t=(r.request_type||'').toLocaleLowerCase('tr-TR');if(/sigorta|poliçe|prim|zeyil|teminat|lehtar|dain/.test(t))return'insurance';if(/hasar/.test(t))return'claims';if(/kart/.test(t))return'cards';if(/kredi/.test(t))return'loans';if(/fatura|otomatik ödeme/.test(t))return'payments';if(/transfer|eft|fast|havale|kolay adres|ödeme iste/.test(t))return'transfers';if(/hesap|mevduat|ekstre/.test(t))return'accounts';return'customers'}
@@ -308,6 +361,6 @@ async function globalSearch(q){if(!q)return;const lc=q.toLocaleLowerCase('tr-TR'
 
 async function openLegacy(page='dashboard'){const label=LEGACY_PAGE_LABELS[page]||'EBS İşlem Ekranı';let hs={legacy_ok:false};try{hs=await fetch('/health',{cache:'no-store'}).then(r=>r.json())}catch{}if(!hs.legacy_ok){const map={dashboard:'home',customers:'customer360',requests:'worklist',teller:'teller-hub',accounts:'accounts-hub',transfers:'transfers-hub',payments:'payments-hub',fx:'fx-hub',loans:'loans-hub',cards:'cards-hub',insurance:'insurance-hub',claims:'claims-hub',commercial:'commercial-hub',documents:'documents-hub',approvals:'approvals-hub',scenarios:'admin-training',reports:'admin-reports'};const target=map[page];if(target){toast('Eski uyumluluk ekranı kapalı; aynı işlem merkezi v3 çalışma alanında açıldı.');return go(target)}modal(label,`<div class="alert info clean-note"><strong>Merkezi v3 çalışma alanı hazır.</strong><br>Eski EBS uyumluluk ekranı bu bilgisayarda çalışmıyor. Bu durum giriş veya ana programı engellemez.</div>`,`<button class="btn primary" onclick="EBS.closeModal()">Tamam</button>`);return}const base=S.runtime.legacy_url;const src=base+`?v3token=${encodeURIComponent(S.token)}&v3page=${encodeURIComponent(page)}&client_mode=${S.runtime.client==='customer'?'customer':'staff'}`;modal(label,`<iframe class="legacy-frame" src="${src}" title="${esc(label)}"></iframe>`,`<button class="btn outline" onclick="EBS.closeModal()">Kapat</button>`,true)}
 
-window.EBS={go,openLegacy,closeModal,cardAction,selectCustomer,customer360Tab,submitScenarioBulk,sendMessage,previewPolicyEndorsement,submitPolicyEndorsement};
+window.EBS={go,openLegacy,closeModal,cardAction,sortTable,selectCustomer,customer360Tab,submitScenarioBulk,sendMessage,previewPolicyEndorsement,submitPolicyEndorsement};
 boot().catch(e=>{console.error(e);$('#loginError').textContent='Program başlatılamadı: '+e.message;$('#loginError').classList.remove('hidden')});
 })();

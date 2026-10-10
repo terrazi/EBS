@@ -114,6 +114,9 @@ func Credit(tx *sql.Tx, u User, op string, p Payload) (Result, error) {
 		if err := KYC(tx, u, customerID); err != nil {
 			return nil, err
 		}
+		if err := RequireDocument(tx, u, p, customerID, "credit_application"); err != nil {
+			return nil, err
+		}
 		product := Str(p, "product")
 		if product == "" {
 			product = "İhtiyaç Kredisi"

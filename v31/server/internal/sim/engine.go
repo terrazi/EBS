@@ -87,6 +87,9 @@ func (e *Engine) ensure() error {
 	if err = ensureTrainingSchema(tx); err != nil {
 		return err
 	}
+	if err = ensureDocumentsSchema(tx); err != nil {
+		return err
+	}
 	if err = tx.Commit(); err != nil {
 		return err
 	}
@@ -183,6 +186,9 @@ func (e *Engine) Execute(u User, op string, p Payload) (out Result, err error) {
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
+	// Document records are committed before their local training PDF is
+	// materialized, so an I/O failure cannot roll back a valid business entry.
+	e.MaterializeDocuments(ref)
 	return out, nil
 }
 
