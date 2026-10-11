@@ -14,9 +14,22 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"golang.org/x/sys/windows/svc/mgr"
 )
 
 var installerRole = "admin" // admin | personnel | customer
+
+func hasArgument(want string) bool {
+	for _, arg := range os.Args[1:] {
+		if arg == want {
+			return true
+		}
+	}
+	return false
+}
+
+var unattended = hasArgument("--install-unattended")
 
 //go:embed payload/*
 var payload embed.FS
@@ -26,6 +39,13 @@ const productName = "BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU"
 
 func u16(s string) *uint16 { p, _ := syscall.UTF16PtrFromString(s); return p }
 func msg(title, text string, flags uintptr) {
+	if unattended {
+		fmt.Fprintln(os.Stdout, text)
+		if flags&0x10 != 0 {
+			os.Exit(1)
+		}
+		return
+	}
 	p := syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW")
 	p.Call(0, uintptr(unsafe.Pointer(u16(text))), uintptr(unsafe.Pointer(u16(title))), flags)
 }
@@ -76,37 +96,6 @@ func logf(f string, a ...any) {
 }
 func exists(p string) bool { _, e := os.Stat(p); return e == nil }
 
-// stopInstalledExe stops only a process whose executable path is the file we
-// are about to replace. Matching by image name (taskkill /IM) could terminate
-// an unrelated program with the same filename on a shared training PC.
-func stopInstalledExe(path string) error {
-	target, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	script := fmt.Sprintf("$target='%s'; Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop }", psQuote(target), psQuote(filepath.Base(target)))
-	if err := powershell(script); err != nil {
-		return err
-	}
-	deadline := time.Now().Add(5 * time.Second)
-	for time.Now().Before(deadline) {
-		if !installedProcess(path) {
-			return nil
-		}
-		time.Sleep(150 * time.Millisecond)
-	}
-	return fmt.Errorf("çalışan süreç durdurulamadı: %s", path)
-}
-
-func installedProcess(path string) bool {
-	target, err := filepath.Abs(path)
-	if err != nil {
-		return false
-	}
-	script := fmt.Sprintf("$target='%s'; $p=Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) }; if($p){ exit 0 } else { exit 1 }", psQuote(target), psQuote(filepath.Base(target)))
-	return powershell(script) == nil
-}
-
 func portInUse(addr string) bool {
 	c, err := net.DialTimeout("tcp", addr, 450*time.Millisecond)
 	if err != nil {
@@ -125,16 +114,36 @@ func run(name string, args ...string) error {
 	if e != nil {
 		logf("ERR %v", e)
 	}
-	return e
+	if e != nil {
+		return fmt.Errorf("%s: %w; %s", name, e, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 func psQuote(s string) string { return strings.ReplaceAll(s, "'", "''") }
 func powershell(script string) error {
-	return exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script).Run()
+	c := exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; "+script)
+	out, err := c.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("PowerShell: %w; %s", err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
-func shortcut(path, target, icon, workdir, desc string) {
-	_ = os.MkdirAll(filepath.Dir(path), 0755)
+func shortcut(path, target, icon, workdir, desc string) error {
+	if unattended && hasArgument("--test-skip-shortcuts") {
+		logf("TEST ONLY: kısayol doğrulaması açık test bayrağıyla atlandı: %s", path)
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
 	sc := fmt.Sprintf(`$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut('%s');$s.TargetPath='%s';$s.WorkingDirectory='%s';$s.IconLocation='%s,0';$s.Description='%s';$s.Save()`, psQuote(path), psQuote(target), psQuote(workdir), psQuote(icon), psQuote(desc))
-	_ = powershell(sc)
+	if err := powershell(sc); err != nil {
+		return fmt.Errorf("kısayol oluşturulamadı (%s): %w", path, err)
+	}
+	if !exists(path) {
+		return fmt.Errorf("kısayol kaydedilmedi: %s", path)
+	}
+	return nil
 }
 func readPayload(name string) ([]byte, error) { return payload.ReadFile("payload/" + name) }
 func writePayload(name, dst string) error {
@@ -221,7 +230,7 @@ func installClient(role string) (string, error) {
 		label = "Müşteri"
 	}
 	dst := filepath.Join(dir, name)
-	if e := stopInstalledExe(dst); e != nil && installedProcess(dst) {
+	if e := stopInstalledExe(dst); e != nil {
 		return "", fmt.Errorf("eski %s istemcisi kapatılamadı: %w", label, e)
 	}
 	preserveLegacy(dst, strings.TrimSuffix(name, ".exe"))
@@ -230,8 +239,12 @@ func installClient(role string) (string, error) {
 	}
 	ico := filepath.Join(rootDir(), "Icons", iconName)
 	link := fullName + " - " + label + ".lnk"
-	shortcut(filepath.Join(desktop(), link), dst, ico, dir, fullName+" — "+label)
-	shortcut(filepath.Join(startMenu(), link), dst, ico, dir, fullName+" — "+label)
+	if err := shortcut(filepath.Join(desktop(), link), dst, ico, dir, fullName+" — "+label); err != nil {
+		return "", err
+	}
+	if err := shortcut(filepath.Join(startMenu(), link), dst, ico, dir, fullName+" — "+label); err != nil {
+		return "", err
+	}
 	return dst, nil
 }
 
@@ -287,90 +300,103 @@ func localLANIP() string {
 
 func installServer() (string, error) {
 	srv := filepath.Join(rootDir(), "Server")
-	_ = os.MkdirAll(srv, 0755)
-	v3 := filepath.Join(srv, "EBS_v3_Service.exe")
-	core := filepath.Join(srv, "EBS_Core_Server.exe")
-	_ = run("sc.exe", "stop", "EBSv3ProService")
-	if e := stopInstalledExe(v3); e != nil && installedProcess(v3) {
-		return "", fmt.Errorf("eski merkezi Server kapatılamadı: %w", e)
+	if err := os.MkdirAll(srv, 0755); err != nil {
+		return "", err
 	}
-	// Do not kill an unrelated listener. If 8792 is occupied by another
-	// application, report it before replacing files or registering the service.
-	if portInUse("127.0.0.1:8792") && !healthOK("http://localhost:8792") {
+	v3 := filepath.Join(srv, "EBS_v3_Service.exe")
+	m, err := mgr.Connect()
+	if err != nil {
+		return "", fmt.Errorf("Windows servis yöneticisine bağlanılamadı: %w", err)
+	}
+	defer m.Disconnect()
+	if err = stopRegisteredService(m); err != nil {
+		return "", err
+	}
+	if err = stopInstalledExe(v3); err != nil {
+		return "", fmt.Errorf("önceki merkezi Server süreci durdurulamadı: %w", err)
+	}
+	if portInUse("127.0.0.1:8792") {
 		return "", fmt.Errorf("8792 portu başka bir uygulama tarafından kullanılıyor; mevcut süreç kapatılmadı")
 	}
-	if e := writePayload("EBS_v3_Service.exe", v3); e != nil {
-		return "", e
+	if err = writePayload("EBS_v3_Service.exe", v3); err != nil {
+		return "", err
 	}
-	// Eski EBS çekirdeği artık zorunlu değildir; bulunuyorsa uyumluluk için kullanılır.
 	if b, e := readPayload("EBS_Core_Server.exe"); e == nil && len(b) > 0 {
-		_ = writePayload("EBS_Core_Server.exe", core)
+		if err = writePayload("EBS_Core_Server.exe", filepath.Join(srv, "EBS_Core_Server.exe")); err != nil {
+			return "", err
+		}
 	}
-	_ = run("netsh.exe", "advfirewall", "firewall", "delete", "rule", "name=EBS v3 STABLE 8792")
-	_ = run("netsh.exe", "advfirewall", "firewall", "add", "rule", "name=EBS v3 STABLE 8792", "dir=in", "action=allow", "protocol=TCP", "localport=8792")
-	_ = run("netsh.exe", "advfirewall", "firewall", "delete", "rule", "name=EBS v3 STABLE Discovery 8793")
-	_ = run("netsh.exe", "advfirewall", "firewall", "add", "rule", "name=EBS v3 STABLE Discovery 8793", "dir=in", "action=allow", "protocol=UDP", "localport=8793")
-
-	_ = run("sc.exe", "delete", "EBSv3ProService")
-	time.Sleep(800 * time.Millisecond)
-	quoted := `"` + v3 + `"`
-	_ = run("sc.exe", "create", "EBSv3ProService", "binPath=", quoted, "start=", "auto", "DisplayName=", fullName+" v3.1 STABLE Server")
-	_ = run("sc.exe", "description", "EBSv3ProService", productName+" merkezi Server")
-	_ = run("sc.exe", "failure", "EBSv3ProService", "reset=", "86400", "actions=", "restart/5000/restart/10000/restart/30000")
-	_ = run("sc.exe", "start", "EBSv3ProService")
-	// The executable is registered with SCM above. Starting a second
-	// --console copy while the service is still booting can race SQLite and
-	// leave both processes unhealthy. Wait for the registered service and let
-	// SCM's recovery policy handle a genuine startup failure.
-	if !waitHealth("http://localhost:8792", 15*time.Second) {
-		return "", fmt.Errorf("merkezi v3 Server 8792 portunda başlatılamadı")
+	service, err := configureService(m, v3)
+	if err != nil {
+		return "", err
+	}
+	defer service.Close()
+	if err = awaitService(service); err != nil {
+		return "", fmt.Errorf("%w%s", err, serverLogTail())
+	}
+	for _, rule := range []struct{ name, protocol, port string }{{"EBS v3 STABLE 8792", "TCP", "8792"}, {"EBS v3 STABLE Discovery 8793", "UDP", "8793"}} {
+		err = run("netsh.exe", "advfirewall", "firewall", "set", "rule", "name="+rule.name, "new", "dir=in", "action=allow", "protocol="+rule.protocol, "localport="+rule.port, "enable=yes")
+		if err != nil {
+			err = run("netsh.exe", "advfirewall", "firewall", "add", "rule", "name="+rule.name, "dir=in", "action=allow", "protocol="+rule.protocol, "localport="+rule.port, "enable=yes")
+		}
+		if err != nil {
+			return "", fmt.Errorf("Server yerelde hazır fakat ağ erişimi güvenlik duvarına eklenemedi (%s): %w", rule.port, err)
+		}
 	}
 	cmd := filepath.Join(srv, "EBS_Server_Baslat.cmd")
-	script := "@echo off\r\n" +
-		"cd /d \"%~dp0\"\r\n" +
-		"rem EBSv3ProService is configured for automatic start. Never launch a second\r\n" +
-		"rem --console instance at logon; two engines can lock the SQLite database.\r\n" +
-		"sc query EBSv3ProService >nul 2>&1\r\n" +
-		"if not errorlevel 1 (\r\n" +
-		"  sc start EBSv3ProService >nul 2>&1\r\n" +
-		"  exit /b 0\r\n" +
-		")\r\n" +
-		"start \"\" /min \"%~dp0EBS_v3_Service.exe\" --console\r\n" +
-		"exit /b 0\r\n"
-	_ = os.WriteFile(cmd, []byte(script), 0644)
+	script := "@echo off\r\nsc start EBSv3ProService\r\nif errorlevel 1 echo Servis baslatilamadi veya zaten calisiyor. EBS kurulum gunlugunu kontrol edin.\r\nexit /b\r\n"
+	if err = os.WriteFile(cmd, []byte(script), 0644); err != nil {
+		return "", err
+	}
+	// Automatic SCM startup replaces the obsolete logon console shortcut.
+	if err = os.Remove(filepath.Join(startupDir(), "EBS Server v3.1 STABLE.lnk")); err != nil && !os.IsNotExist(err) {
+		return "", fmt.Errorf("eski başlangıç kısayolu kaldırılamadı: %w", err)
+	}
 	ico := filepath.Join(rootDir(), "Icons", "EBS_Server.ico")
-	shortcut(filepath.Join(startupDir(), "EBS Server v3.1 STABLE.lnk"), cmd, ico, srv, fullName+" Server başlangıcı")
-	shortcut(filepath.Join(startMenu(), "EBS Server Başlat.lnk"), cmd, ico, srv, fullName+" Server başlat")
+	if err := shortcut(filepath.Join(startMenu(), "EBS Server Başlat.lnk"), cmd, ico, srv, fullName+" Server başlat"); err != nil {
+		return "", err
+	}
 	ip := localLANIP()
 	if ip == "" {
 		ip = "localhost"
 	}
 	u := "http://" + net.JoinHostPort(ip, "8792")
-	_ = os.MkdirAll(dataDir(), 0755)
-	_ = os.WriteFile(filepath.Join(dataDir(), "v3_server_url.txt"), []byte(u+"\r\n"), 0644)
-	info := "EBS MERKEZİ SERVER ADRESİ\r\n" + u + "\r\n\r\nAynı bilgisayardaki istemciler otomatik olarak localhost üzerinden de bağlanabilir.\r\nUzak Personel/Müşteri bilgisayarlarında bu adresi kullanın.\r\n"
-	_ = os.WriteFile(filepath.Join(desktop(), "EBS_SERVER_ADRESI.txt"), []byte(info), 0644)
+	if err = os.MkdirAll(dataDir(), 0755); err != nil {
+		return "", err
+	}
+	if err = os.WriteFile(filepath.Join(dataDir(), "v3_server_url.txt"), []byte(u+"\r\n"), 0644); err != nil {
+		return "", err
+	}
+	info := "EBS MERKEZİ SERVER ADRESİ\r\n" + u + "\r\n\r\nAynı bilgisayardaki istemciler localhost üzerinden de bağlanabilir.\r\nUzak Personel/Müşteri bilgisayarlarında bu adresi kullanın.\r\n"
+	if err = os.WriteFile(filepath.Join(desktop(), "EBS_SERVER_ADRESI.txt"), []byte(info), 0644); err != nil {
+		return "", err
+	}
 	return u, nil
 }
 
-func writeLoginInfo() {
-	b, e := readPayload("GIRIS_BILGILERI.txt")
-	if e != nil {
-		return
+func writeLoginInfo() error {
+	b, err := readPayload("GIRIS_BILGILERI.txt")
+	if err != nil {
+		return err
 	}
-	_ = os.WriteFile(filepath.Join(rootDir(), "GIRIS_BILGILERI.txt"), b, 0644)
-	_ = os.WriteFile(filepath.Join(desktop(), "EBS_GIRIS_BILGILERI.txt"), b, 0644)
+	for _, path := range []string{filepath.Join(rootDir(), "GIRIS_BILGILERI.txt"), filepath.Join(desktop(), "EBS_GIRIS_BILGILERI.txt")} {
+		if err = os.WriteFile(path, b, 0644); err != nil {
+			return fmt.Errorf("giriş bilgileri yazılamadı (%s): %w", path, err)
+		}
+	}
+	return nil
 }
-func writeUninstall() {
-	p := filepath.Join(rootDir(), "EBS_v3_Kaldir.cmd")
-	s := "@echo off\r\n" +
+func writeUninstall() error {
+	path := filepath.Join(rootDir(), "EBS_v3_Kaldir.cmd")
+	script := "@echo off\r\n" +
 		"net session >nul 2>&1 || (powershell -NoProfile -Command \"Start-Process '%~f0' -Verb RunAs\" & exit /b)\r\n" +
-		"sc stop EBSv3ProService >nul 2>&1\r\n" +
-		"sc delete EBSv3ProService >nul 2>&1\r\n" +
-		"taskkill /F /IM EBS_v3_Service.exe >nul 2>&1\r\n" +
-		"echo EBS v3 servis kaydi kaldirildi. Legacy klasoru ve veri dosyalari korunmustur.\r\n" +
-		"pause\r\n"
-	_ = os.WriteFile(p, []byte(s), 0644)
+		"sc stop EBSv3ProService\r\n" +
+		"sc delete EBSv3ProService\r\n" +
+		"echo EBS servis kaydi kaldirildi. Veri dosyalari korunmustur.\r\npause\r\n"
+	if err := os.WriteFile(path, []byte(script), 0644); err != nil {
+		return fmt.Errorf("kaldırma dosyası yazılamadı: %w", err)
+	}
+	return nil
 }
 
 func verifyInstalled(role string) error {
@@ -393,6 +419,10 @@ func verifyInstalled(role string) error {
 func main() {
 	logf("=== v3.1 STABLE TAM KURULUM BAŞLADI | rol=%s ===", installerRole)
 	if !isAdmin() {
+		if unattended {
+			msg(fullName, "Kurulum için yönetici izni gerekiyor.", 0x10)
+			return
+		}
 		if elevate() {
 			return
 		}
@@ -423,9 +453,16 @@ func main() {
 		msg(fullName, "Kurulum tamamlanamadı:\n"+err.Error()+"\n\nGünlük: "+logFile(), 0x10)
 		return
 	}
-	writeLoginInfo()
-	writeUninstall()
+	if err = writeLoginInfo(); err == nil {
+		err = writeUninstall()
+	}
+	if err != nil {
+		logf("KURULUM HATASI: %v", err)
+		msg(fullName, "Kurulum tamamlanamadı:\n"+err.Error()+"\n\nGünlük: "+logFile(), 0x10)
+		return
+	}
 	if err = verifyInstalled(installerRole); err != nil {
+		logf("KURULUM DOĞRULAMA HATASI: %v", err)
 		msg(fullName, err.Error(), 0x10)
 		return
 	}

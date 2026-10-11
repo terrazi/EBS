@@ -1,23 +1,24 @@
 # EBS Bankacılık ve Sigortacılık Eğitim Simülasyonu
 
-Bu depo, 09.10.2026 tarihli yeniden geliştirme kılavuzundaki kuralları temel alan, kurulumsuz bir geliştirme çekirdeğidir. Merkezi API ve SQLite veri deposu aynı gerçek veriyi Admin, Personel ve Müşteri görünümleri için kullanır.
+Windows kurulum paketindeki merkezi Server ve Admin, Personel, Müşteri istemcilerinin kaynakları `v31/` altındadır. Merkezi Go API ve SQLite veri deposu aynı veriyi üç rol için sunar. Windows kurulumu [kurulum kılavuzunda](docs/WINDOWS_KURULUM.txt) açıklanır.
 
 ## Çalıştırma
 
-Python 3.11+ yeterlidir; harici paket gerekmez.
+Güncel merkezi Server için Go 1.23.2 kullanılır. Linux geliştirme ortamında da Windows paketiyle aynı API ve işlem motoru çalıştırılır:
 
 ```bash
-cd /workspace/EBS
-python3 -m ebs.server --host 127.0.0.1 --port 8792
+cd /workspace/EBS/v31/server
+go run .
 ```
 
-Tarayıcıdan `http://127.0.0.1:8792/` adresini açın. İlk açılışta `var/ebs.sqlite3` oluşturulur ve 30 adet `SCENARIO_DEMO` müşteri, 60 hesap, kart/kredi/poliçe/hasar kayıtları ile kampanyalar eklenir. Uygulama EBS_02 v3.1 sözleşmesindeki merkezi 8792 giriş modelini kullanır; eski 8787 çekirdeği bu dikey dilim için gerekli değildir.
+Merkezi Server 8792 portunu kullanır; `/health` protokol, derleme sürümü ve işlem motorunun hazır olma durumunu döndürür. İlk açılışta SQLite eğitim veritabanı oluşturulur. Windows'ta veri konumu `C:\ProgramData\EBS Bankacilik ve Sigortacilik\v3pro`; Linux'ta `ProgramData` ortam değişkeniyle veri kökü seçilebilir. Eski 8787 çekirdeği giriş için gerekli değildir.
 
 Temel testler:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ./scripts/smoke_test.sh
+cd v31/server && go test ./...
 ```
 
 Varsayılan eğitim kullanıcıları v3.1 kimlikleriyle seed edilir: `admin / EBS2026!`; `gise01`, `gise02`, `musteritemsilci`, `operasyonyetkilisi`, `krediyetkilisi`, `sigortayetkilisi`, `hasaryetkilisi`, `denetci` / `1234`. Müşteri demo kullanıcı adı müşterinin tam adı, şifresi `1234` şeklindedir. Giriş sonrası Bearer oturumu kullanılır; state değiştiren uçlar oturum olmadan çalışmaz.
@@ -31,9 +32,9 @@ Varsayılan eğitim kullanıcıları v3.1 kimlikleriyle seed edilir: `admin / EB
 
 ## v3.1 uyumluluk uçları
 
-- `GET /api/health`, `GET /health`, `GET /runtime.json`
-- `POST /api/login`, `GET /api/session`, `POST /api/logout`
-- `GET /api/catalog`, `GET /api/card/<kod>`, `GET /api/events`, `POST /api/action`
+- `GET /health`, `GET /v3api/api/health`, `GET /runtime.json`
+- `POST /api/login`, `GET /api/me`, `POST /api/logout`
+- `GET /v3api/api/catalog`, `GET /v3api/api/card/<kod>`, `GET /v3api/api/events`, `POST /v3api/api/action`
 - `GET /api/customer-portal/summary` müşteri oturumunu kendi müşteri kaydıyla sınırlar.
 
 `/api/manifest` ve `/api/catalog` aynı 206 kart sözleşmesini sunar. Aksiyonlar benzersiz referans, kullanıcı, istemci, durum ve idempotency anahtarıyla SQLite'a kaydedilir.
@@ -42,6 +43,8 @@ Varsayılan eğitim kullanıcıları v3.1 kimlikleriyle seed edilir: `admin / EB
 
 `manifest/cards.json`, verilen 206 ekran sözleşmesindeki kartları gerçek uygulama türü ve API sahibiyle eşler. Ana kılavuz ve devir notları `docs/` altında tutulur.
 
-EBS_01 eski çalışan davranış ve ekran referansı, EBS_02 v3.1 merkezi Server kaynak tabanı, EBS_03 ise kurulabilir Windows paket referansı olarak incelendi. Bu Linux çalışma alanında Windows EXE'leri çalıştırmak yerine aynı merkezi API sözleşmesini test edilebilir Python/SQLite çekirdeğinde uyguladık. EBS_03 içindeki payload SHA256 kayıtları doğrulandı; yalnızca `SHA256SUMS.txt` dosyasının kendi kendine yazılmış özet satırı tutarsızdır.
+EBS_01 eski çalışan davranış ve ekran referansı, EBS_02 v3.1 merkezi Server kaynak tabanı, EBS_03 ise kurulabilir Windows paket referansıdır. `ebs/` altındaki Python uygulaması ayrı geliştirme prototipidir; Windows installer payload'u değildir. Kurulum ve istemci bağlantı testleri `v31/` altındaki gerçek Go Server üzerinde yürütülmelidir.
 
-Windows UAC, servis, firewall, LAN, kısayol, uninstall/restore/upgrade ve üç ayrı EXE fiziksel testleri bu Linux ortamında yapılmadı; başarılı kabul edilmiş gibi raporlanmamalıdır.
+Windows paketini tek kaynak sürümünden yeniden üretmek için `scripts/build_windows_release.py build --output /tmp/ebs-release --go <go-yolu>` çalıştırılır. EXE doğrulaması ve kaynak/payload commit'inden sonra `package` komutu aynı klasörü kullanır. Kaynak veya gömülü dosya özetleri değişmişse paketleme durdurulur. Derleme kimliği, kaynak commit'i ve SHA256 özetleri iki ZIP'teki `BUILD_MANIFEST.json` dosyasında bulunur.
+
+Windows EXE'leri için Wine üzerinde ek çalışma kontrolleri yapılabilir; bu kontroller gerçek Windows UAC, Defender, firewall ve sınıf ağı kabul testinin yerini tutmaz. Doğrulama sonuçları [11 Ekim kontrol raporunda](docs/REVIZYON_DOGRULAMA_20261011.md) belirtilir. Bu sürüm kurulum ve giriş düzeltmesidir; 206 kartın tümünün kabulünü veya hasar modülünün tamamlandığını ifade etmez.

@@ -18,8 +18,8 @@ Hasar Yetkilisi: hasaryetkilisi / 1234
 Denetçi: denetci / 1234
 
 MÜŞTERİ CLIENT – DEMO MÜŞTERİLER
-Ayşe Yılmaz / 1234
-Mehmet Kaya / 1234
+Ahmet Karaca / 1234
+Selin Yılmaz / 1234
 Zeynep Demir / 1234
 
 NOTLAR
@@ -27,3 +27,6 @@ NOTLAR
 - Eğitim katılımcısı bilgisi, banka/sigorta görev rolünden ayrı olarak senaryo ve değerlendirme katmanında tutulur.
 - Merkezi v3 işlem motoru giriş için eski EBS 8787 çekirdeğine bağımlı değildir.
 - Eski EBS çekirdeği yalnız mevcut eski ekranlarla uyumluluk için isteğe bağlı olarak çalıştırılır.
+
+- Müşteri kimlikleri, hesapları ve tüm giriş oturumları merkezi kalıcı eğitim veritabanından doğrulanır.
+- Yukarıdaki adlar ilk eğitim kurulumunun varsayılanlarıdır; mevcut veritabanındaki kullanıcı değişiklikleri korunur.

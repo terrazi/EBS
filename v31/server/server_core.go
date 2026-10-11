@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"ebs-v3-service/internal/sim"
@@ -37,7 +38,7 @@ const legacyBase = "http://127.0.0.1:8787"
 
 const (
 	centralProtocol = "ebs-v31"
-	centralBuild    = "20261010-login-fix-6"
+	centralBuild    = "20261011-startup-fix-1"
 )
 
 type operationalAlias struct {
@@ -84,14 +85,22 @@ func rewriteOperationalIdentityBytes(b []byte) []byte {
 	return b
 }
 
+// Optional compatibility status must never hold up the central health endpoint.
+// Only the compatibility supervisor/proxy probes the legacy process; central
+// readiness reports the last observation without network I/O.
+var legacyAvailable atomic.Bool
+
 func legacyAPIReady() bool {
 	c := &http.Client{Timeout: 1200 * time.Millisecond}
 	resp, err := c.Get(legacyBase + "/api/public/branding")
 	if err != nil {
+		legacyAvailable.Store(false)
 		return false
 	}
 	defer resp.Body.Close()
-	return resp.StatusCode >= 200 && resp.StatusCode < 300
+	ok := resp.StatusCode >= 200 && resp.StatusCode < 300
+	legacyAvailable.Store(ok)
+	return ok
 }
 
 func stopLegacyProcesses() {
@@ -281,7 +290,12 @@ func ensureLegacyServer() bool {
 }
 
 func superviseLegacy(stop <-chan struct{}) {
-	// Immediate first-start recovery.
+	// Immediate first-start recovery, unless shutdown already won the race.
+	select {
+	case <-stop:
+		return
+	default:
+	}
 	ensureLegacyServer()
 	t := time.NewTicker(6 * time.Second)
 	defer t.Stop()
@@ -308,37 +322,55 @@ func clientModeFromRequest(r *http.Request) string {
 	}
 }
 
-// centralAPIHandler keeps the compatibility login response and the durable
-// v3 session in one response. This prevents a proxy or old gateway from
-// corrupting the second, browser-side v3 login request.
+// centralAPIHandler authenticates against the durable identity store once and
+// exposes the same expiring session through both compatibility and v3 APIs.
+// A fallback demo credential must never report success after durable login fails.
 func centralAPIHandler(engine *sim.Engine, legacy http.Handler) http.Handler {
-	compat := fb.apiHandler(legacy)
+	compat := fb.apiHandlerWithEngine(legacy, engine)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if engine == nil || r.URL.Path != "/api/login" || r.Method != http.MethodPost {
+		if r.URL.Path != "/api/login" {
 			compat.ServeHTTP(w, r)
+			return
+		}
+		if r.Method != http.MethodPost {
+			jsonOut(w, http.StatusMethodNotAllowed, map[string]string{"message": "Yalnız POST desteklenir."})
+			return
+		}
+		if engine == nil {
+			jsonOut(w, http.StatusServiceUnavailable, map[string]string{"message": "Merkezi işlem motoru hazır değil. Server başlangıç günlüğünü kontrol edin."})
 			return
 		}
 		var in struct {
 			Username string `json:"username"`
 			Password string `json:"password"`
+			Client   string `json:"client"`
 		}
-		if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
-			jsonOut(w, http.StatusBadRequest, map[string]string{"message": "Geçerli bir giriş JSON gövdesi gerekli."})
+		if err := decodeJSON(r, &in); err != nil {
+			jsonOut(w, http.StatusBadRequest, map[string]string{"message": err.Error()})
 			return
 		}
-		tok, u, ok := fb.login(in.Username, in.Password)
-		if !ok {
-			jsonOut(w, http.StatusUnauthorized, map[string]string{"message": "Kullanıcı adı veya şifre hatalı."})
+		if in.Client == "" && r.Header.Get("X-EBS-Client-Mode") == "customer" {
+			in.Client = "customer"
+		}
+		v3, err := engine.Login(in.Username, in.Password, in.Client)
+		if err != nil {
+			jsonOut(w, http.StatusUnauthorized, map[string]string{"message": err.Error()})
 			return
 		}
-		out := authResponse(tok, u)
-		// "web" deliberately accepts every demo role; the client-specific role
-		// check remains enforced by the v3 login engine and the UI.
-		if v3, err := engine.Login(in.Username, in.Password, "web"); err == nil {
-			if token, ok := v3["token"].(string); ok && token != "" {
-				out["v3_token"] = token
-			}
+		token, ok := v3["token"].(string)
+		if !ok || token == "" {
+			jsonOut(w, http.StatusServiceUnavailable, map[string]string{"message": "Merkezi oturum üretilemedi."})
+			return
 		}
+		u, err := engine.Session(token)
+		if err != nil {
+			_ = engine.Logout(token)
+			jsonOut(w, http.StatusServiceUnavailable, map[string]string{"message": "Merkezi oturum doğrulanamadı."})
+			return
+		}
+		out := authResponse(token, compatibilityUser(u))
+		out["v3_token"] = token
+		out["expires_at"] = v3["expires_at"]
 		jsonOut(w, http.StatusOK, out)
 	})
 }
@@ -346,10 +378,10 @@ func centralAPIHandler(engine *sim.Engine, legacy http.Handler) http.Handler {
 func v3APIMux(store *Store) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAPIReady(), "api_mode": "central-hybrid", "time": time.Now()})
+		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAvailable.Load(), "api_mode": "central-hybrid", "time": time.Now()})
 	})
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAPIReady(), "api_mode": "central-hybrid"})
+		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAvailable.Load(), "api_mode": "central-hybrid"})
 	})
 	mux.HandleFunc("/api/catalog", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := embedded.ReadFile("design_cards.json")
@@ -580,19 +612,23 @@ func discoveryResponder(stop <-chan struct{}) {
 	}
 }
 
-func newHTTPServer(stop <-chan struct{}) *http.Server {
-	logPath := filepath.Join(programData(), "service.log")
-	_ = os.MkdirAll(filepath.Dir(logPath), 0755)
-	if f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
-		log.SetOutput(f)
-	}
+func newHTTPServer(_ <-chan struct{}) (*http.Server, func()) {
+	srv, cleanup, _ := buildHTTPServer()
+	return srv, cleanup
+}
+
+func buildHTTPServer() (*http.Server, func(), error) {
 	store := newStore()
 	v3mux := v3APIMux(store)
 	var engine *sim.Engine
+	var engineError string
+	var startupError error
 	// The durable simulator engine is initialized once for the central service.
 	// The preserved v3 event API remains mounted for compatibility, while new
 	// clients use the authenticated transactional /v3api/api/v3 endpoints.
 	if opened, err := sim.Open(filepath.Join(programData(), "ebs-v31.sqlite3")); err != nil {
+		engineError = err.Error()
+		startupError = fmt.Errorf("central transaction engine: %w", err)
 		log.Printf("v3 simulation engine unavailable: %v", err)
 		v3mux.HandleFunc("/api/v3/login", func(w http.ResponseWriter, r *http.Request) {
 			jsonOut(w, http.StatusServiceUnavailable, map[string]any{"error": "V3 işlem motoru hazır değil; Server veritabanı başlatılamadı."})
@@ -606,9 +642,10 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 	files := http.FileServer(http.FS(webFS))
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		jsonOut(w, 200, map[string]any{"ok": true, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE", "legacy_ok": legacyAPIReady(), "api_mode": "central-hybrid", "protocol": centralProtocol, "build": centralBuild, "engine_ready": engine != nil})
-	})
+	health := centralHealthHandler(engine != nil, engineError)
+	mux.Handle("/health", health)
+	mux.Handle("/v3api/api/health", health)
+	mux.Handle("/v3api/health", health)
 	mux.HandleFunc("/runtime.json", func(w http.ResponseWriter, r *http.Request) {
 		jsonOut(w, 200, map[string]any{
 			"client":       clientModeFromRequest(r),
@@ -617,13 +654,14 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 			"product_name": "BANKACILIK VE SİGORTACILIK EĞİTİM SİMÜLASYONU",
 			"upstream":     "merkezi v3 işlem motoru",
 			"upstream_ok":  engine != nil,
-			"legacy_ok":    legacyAPIReady(),
+			"legacy_ok":    legacyAvailable.Load(),
 			"v3":           "merkezi v3 servis",
 			"v3_ok":        engine != nil,
 			"legacy_url":   "/legacy/",
 			"protocol":     centralProtocol,
 			"build":        centralBuild,
 			"engine_ready": engine != nil,
+			"engine_error": engineError,
 		})
 	})
 	mux.HandleFunc("/design_cards.json", func(w http.ResponseWriter, r *http.Request) {
@@ -682,26 +720,99 @@ func newHTTPServer(stop <-chan struct{}) *http.Server {
 		legacy.ServeHTTP(w, r)
 	})
 
-	addr := os.Getenv("EBS_V3_LISTEN")
-	if addr == "" {
-		addr = ":8792"
+	return &http.Server{Addr: centralListenAddress(), Handler: mux, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 120 * time.Second}, func() {
+		if engine != nil {
+			_ = engine.Close()
+		}
+	}, startupError
+}
+
+func centralHealthHandler(engineReady bool, engineError string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status, state := http.StatusOK, "ready"
+		if !engineReady {
+			status, state = http.StatusServiceUnavailable, "failed"
+		}
+		jsonOut(w, status, map[string]any{
+			"ok": engineReady, "service": "EBS v3.0 PRO Service", "version": "3.1 STABLE",
+			"legacy_ok": legacyAvailable.Load(), "api_mode": "central-hybrid",
+			"protocol": centralProtocol, "build": centralBuild, "engine_ready": engineReady,
+			"engine_error": engineError, "state": state,
+		})
+	})
+}
+
+func centralListenAddress() string {
+	if addr := os.Getenv("EBS_V3_LISTEN"); addr != "" {
+		return addr
 	}
-	go superviseLegacy(stop)
-	go discoveryResponder(stop)
-	return &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 120 * time.Second}
+	return ":8792"
+}
+
+func configureServiceLogging() func() {
+	logPath := filepath.Join(programData(), "service.log")
+	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
+		log.Printf("service log directory: %v", err)
+		return func() {}
+	}
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Printf("service log file: %v", err)
+		return func() {}
+	}
+	previous := log.Writer()
+	log.SetOutput(f)
+	return func() {
+		log.SetOutput(previous)
+		_ = f.Close()
+	}
 }
 
 func runServer(stop <-chan struct{}) error {
-	srv := newHTTPServer(stop)
+	return runServerWithReady(stop, nil)
+}
+
+// Bind before initializing SQLite. A second service copy must fail before it
+// can open or modify the central database. SCM reports RUNNING only after this
+// callback, when the HTTP listener and transaction engine have initialized.
+func runServerWithReady(stop <-chan struct{}, ready func()) error {
+	closeLog := configureServiceLogging()
+	defer closeLog()
+	addr := centralListenAddress()
+	log.Printf("central startup build=%s listen=%s database=%s", centralBuild, addr, filepath.Join(programData(), "ebs-v31.sqlite3"))
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		err = fmt.Errorf("central Server listen %s: %w", addr, err)
+		log.Printf("%v", err)
+		return err
+	}
+	defer listener.Close()
+	srv, cleanup, startupError := buildHTTPServer()
+	defer cleanup()
+	if startupError != nil {
+		return startupError
+	}
+	select {
+	case <-stop:
+		return nil
+	default:
+	}
 	errCh := make(chan error, 1)
 	go func() {
-		err := srv.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			errCh <- err
-		} else {
-			errCh <- nil
+		err := srv.Serve(listener)
+		if err == http.ErrServerClosed {
+			err = nil
 		}
+		errCh <- err
 	}()
+	if ready != nil {
+		ready()
+	}
+	log.Printf("central HTTP listener active at %s", listener.Addr())
+	runtimeStop := make(chan struct{})
+	defer close(runtimeStop)
+	go superviseLegacy(runtimeStop)
+	go discoveryResponder(runtimeStop)
 	select {
 	case <-stop:
 		ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)

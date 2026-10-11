@@ -11,7 +11,9 @@ import (
 
 func TestV3ActionAndNoLegacyDependency(t *testing.T) {
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	ts := httptest.NewServer(srv.Handler)
 	defer ts.Close()
 	close(stop)

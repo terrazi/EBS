@@ -4,7 +4,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/url"
 	"os"
@@ -74,11 +73,25 @@ func readURLFile(path string) string {
 	return ""
 }
 
+func userConfigDir() string {
+	p := os.Getenv("LOCALAPPDATA")
+	if p == "" {
+		if profile := os.Getenv("USERPROFILE"); profile != "" {
+			p = filepath.Join(profile, "AppData", "Local")
+		}
+	}
+	if p == "" {
+		return ""
+	}
+	return filepath.Join(p, "EBS Bankacilik ve Sigortacilik")
+}
+
 func savedV3URL() string {
-	for _, p := range []string{
-		filepath.Join(programDataDir(), "v3_server_url.txt"),
-		filepath.Join(programDataDir(), "server_v3_url.txt"),
-	} {
+	paths := []string{filepath.Join(programDataDir(), "v3_server_url.txt"), filepath.Join(programDataDir(), "server_v3_url.txt")}
+	if user := userConfigDir(); user != "" {
+		paths = append([]string{filepath.Join(user, "v3_server_url.txt"), filepath.Join(user, "server_v3_url.txt")}, paths...)
+	}
+	for _, p := range paths {
 		if s := readURLFile(p); s != "" {
 			if u, e := url.Parse(s); e == nil && u.Port() == "8792" {
 				return trimURL(s)
@@ -106,8 +119,23 @@ func saveV3URL(s string) {
 	if s == "" {
 		return
 	}
-	_ = os.MkdirAll(programDataDir(), 0755)
-	_ = os.WriteFile(filepath.Join(programDataDir(), "v3_server_url.txt"), []byte(trimURL(s)+"\r\n"), 0644)
+	// A Personel/Müşteri user generally cannot modify installer-owned ProgramData.
+	// Store their selected server in a per-user directory, retain machine fallback.
+	directories := []string{}
+	if user := userConfigDir(); user != "" {
+		directories = append(directories, user)
+	}
+	directories = append(directories, programDataDir())
+	var last error
+	for _, directory := range directories {
+		if last = os.MkdirAll(directory, 0755); last != nil {
+			continue
+		}
+		if last = os.WriteFile(filepath.Join(directory, "v3_server_url.txt"), []byte(trimURL(s)+"\r\n"), 0644); last == nil {
+			return
+		}
+	}
+	rememberHealthFailure(s, last)
 }
 
 func deriveV3(raw string) string {
@@ -197,60 +225,6 @@ func startIfExists(path string) {
 	}
 }
 
-// stopExactProcess is used only for an EBS service executable at the known
-// installation path. It also handles the previous console-mode startup task,
-// which SCM cannot stop because it is not registered as a service.
-func stopExactProcess(path string) bool {
-	target, err := filepath.Abs(path)
-	if err != nil {
-		return false
-	}
-	quote := func(s string) string { return strings.ReplaceAll(s, "'", "''") }
-	script := fmt.Sprintf("$target='%s'; Get-CimInstance Win32_Process -Filter \"Name='%s'\" | Where-Object { $_.ExecutablePath -and ([IO.Path]::GetFullPath($_.ExecutablePath) -ieq $target) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop }", quote(target), quote(filepath.Base(target)))
-	return exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script).Run() == nil
-}
-
-func ensureAdminServices() {
-	if clientMode != "admin" {
-		return
-	}
-	// Önce Windows servisini başlat. Bazı Windows/Defender yapılandırmalarında
-	// servis kaydı mevcut olsa bile ilk başlangıç gecikebilir; bu durumda aynı
-	// binary normal arka plan süreci olarak çalıştırılır.
-	_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
-	local := "http://localhost:8792"
-	if !waitHealth(local, 2500*time.Millisecond) {
-		// A listener that failed protocol/build/readiness checks may be an older
-		// registered EBS service. Ask SCM to restart it before deciding that the
-		// server is unavailable. We never kill an unrelated listener here.
-		if c, err := net.DialTimeout("tcp", "localhost:8792", 400*time.Millisecond); err == nil {
-			_ = c.Close()
-			_ = exec.Command("sc.exe", "stop", "EBSv3ProService").Run()
-			// Older installers also created a console-mode Startup shortcut;
-			// stop that exact binary before SCM starts the fresh service.
-			_ = stopExactProcess(filepath.Join(installRoot(), "Server", "EBS_v3_Service.exe"))
-			time.Sleep(900 * time.Millisecond)
-			_ = exec.Command("sc.exe", "start", "EBSv3ProService").Run()
-			if waitHealth(local, 8*time.Second) {
-				return
-			}
-			return
-		}
-		srv := filepath.Join(installRoot(), "Server")
-		p := filepath.Join(srv, "EBS_v3_Service.exe")
-		if _, err := os.Stat(p); err == nil {
-			c := exec.Command(p, "--console")
-			c.Dir = srv
-			_ = c.Start()
-			_ = waitHealth(local, 4500*time.Millisecond)
-		}
-	}
-
-	// Korunan v1 işlem motorunun yaşam döngüsünü merkezi v3 Server yönetir.
-	// Client tarafından iki farklı legacy süreç başlatılmaz; bu yaklaşım 8787
-	// üzerinde yanlış/stale listener oluşmasını ve API 404 hatalarını önler.
-}
-
 func discover(port int, probe string, timeout time.Duration) string {
 	conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
 	if err != nil {
@@ -334,18 +308,19 @@ func resolveV3URL() string {
 	ensureAdminServices()
 	if clientMode == "admin" {
 		localHealth := "http://localhost:8792"
-		if waitHealth(localHealth, 12*time.Second) {
+		if healthOK(localHealth) {
 			publicLocal := localServerURL()
 			if healthOK(publicLocal) {
 				saveV3URL(publicLocal)
 				return publicLocal
 			}
-			// Firewall/LAN profile can occasionally reject the machine's own LAN address
-			// even while the local service is healthy. "localhost" remains a valid final
-			// fallback; the browser is never sent to a numeric 127.0.0.1 page.
 			saveV3URL(localHealth)
 			return localHealth
 		}
+		if resolveDetail == "" {
+			rememberHealthFailure(localHealth, checkHealth(localHealth))
+		}
+		return ""
 	}
 
 	if s := savedV3URL(); s != "" {

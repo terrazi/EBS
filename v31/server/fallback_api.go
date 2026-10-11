@@ -11,15 +11,18 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"ebs-v3-service/internal/sim"
 )
 
 type fallbackUser struct {
-	ID         string `json:"id"`
-	Username   string `json:"username"`
-	Password   string `json:"-"`
-	FullName   string `json:"full_name"`
-	Role       string `json:"role"`
-	CustomerID string `json:"customer_id,omitempty"`
+	ID          string   `json:"id"`
+	Username    string   `json:"username"`
+	Password    string   `json:"-"`
+	FullName    string   `json:"full_name"`
+	Role        string   `json:"role"`
+	CustomerID  string   `json:"customer_id,omitempty"`
+	Permissions []string `json:"-"`
 }
 
 type fallbackState struct {
@@ -48,8 +51,8 @@ func fallbackUsers() []fallbackUser {
 		{ID: "u-sg", Username: "sigortayetkilisi", Password: "1234", FullName: "Sigorta Yetkilisi", Role: "insurance"},
 		{ID: "u-hs", Username: "hasaryetkilisi", Password: "1234", FullName: "Hasar Yetkilisi", Role: "claims"},
 		{ID: "u-dn", Username: "denetci", Password: "1234", FullName: "Denetçi", Role: "auditor"},
-		{ID: "c-1001", Username: "Ayşe Yılmaz", Password: "1234", FullName: "Ayşe Yılmaz", Role: "customer", CustomerID: "1001"},
-		{ID: "c-1002", Username: "Mehmet Kaya", Password: "1234", FullName: "Mehmet Kaya", Role: "customer", CustomerID: "1002"},
+		{ID: "c-1001", Username: "Ahmet Karaca", Password: "1234", FullName: "Ahmet Karaca", Role: "customer", CustomerID: "1001"},
+		{ID: "c-1002", Username: "Selin Yılmaz", Password: "1234", FullName: "Selin Yılmaz", Role: "customer", CustomerID: "1002"},
 		{ID: "c-1003", Username: "Zeynep Demir", Password: "1234", FullName: "Zeynep Demir", Role: "customer", CustomerID: "1003"},
 	}
 }
@@ -70,8 +73,8 @@ func fallbackRoles() []map[string]any {
 
 func fallbackCustomers() []map[string]any {
 	return []map[string]any{
-		{"id": "1001", "customer_number": "10010001", "name": "Ayşe", "surname": "Yılmaz", "tckn": "111******11", "phone": "05** *** ** 11", "kyc_status": "Güncel", "segment": "Bireysel"},
-		{"id": "1002", "customer_number": "10010002", "name": "Mehmet", "surname": "Kaya", "tckn": "222******22", "phone": "05** *** ** 22", "kyc_status": "Güncel", "segment": "Bireysel"},
+		{"id": "1001", "customer_number": "10010001", "name": "Ahmet", "surname": "Karaca", "tckn": "111******11", "phone": "05** *** ** 11", "kyc_status": "Güncel", "segment": "Bireysel"},
+		{"id": "1002", "customer_number": "10010002", "name": "Selin", "surname": "Yılmaz", "tckn": "222******22", "phone": "05** *** ** 22", "kyc_status": "Güncel", "segment": "Bireysel"},
 		{"id": "1003", "customer_number": "10010003", "name": "Zeynep", "surname": "Demir", "tckn": "333******33", "phone": "05** *** ** 33", "kyc_status": "Belge Kontrolü", "segment": "Bireysel"},
 	}
 }
@@ -114,7 +117,7 @@ func fallbackClaims() []map[string]any {
 
 func fallbackTransfers() []map[string]any {
 	return []map[string]any{
-		{"id": "TR-2026-01021", "customer_id": "1001", "source_account": "A-1001-TRY", "recipient": "Mehmet Kaya", "amount": 2500, "currency": "TRY", "type": "FAST", "status": "completed"},
+		{"id": "TR-2026-01021", "customer_id": "1001", "source_account": "A-1001-TRY", "recipient": "Selin Yılmaz", "amount": 2500, "currency": "TRY", "type": "FAST", "status": "completed"},
 	}
 }
 
@@ -185,15 +188,48 @@ func (s *fallbackState) session(r *http.Request) (fallbackUser, bool) {
 	return u, ok
 }
 
+// compatibilityUser is a presentation adapter; identity and permissions always
+// come from the central database rather than the fixed legacy demo catalogue.
+func compatibilityUser(u sim.User) fallbackUser {
+	role := strings.ToLower(u.Role)
+	if u.Role == "PERSONEL" {
+		switch u.Department {
+		case "Gişe / Kasa":
+			role = "teller"
+		case "Müşteri Hizmetleri":
+			role = "customer_service"
+		case "Operasyon":
+			role = "operations"
+		case "Krediler":
+			role = "credit"
+		case "Sigorta":
+			role = "insurance"
+		case "Hasar":
+			role = "claims"
+		case "Denetim":
+			role = "auditor"
+		}
+	}
+	cid := ""
+	if u.CustomerID > 0 {
+		cid = strconv.FormatInt(u.CustomerID, 10)
+	}
+	return fallbackUser{ID: strconv.FormatInt(u.ID, 10), Username: u.Username, FullName: u.Name, Role: role, CustomerID: cid, Permissions: u.Permissions}
+}
+
 func publicUser(u fallbackUser) map[string]any {
-	return map[string]any{"id": u.ID, "username": u.Username, "full_name": u.FullName, "role": u.Role, "active": true}
+	return map[string]any{"id": u.ID, "username": u.Username, "full_name": u.FullName, "role": u.Role, "customer_id": u.CustomerID, "active": true}
 }
 
 func authResponse(token string, u fallbackUser) map[string]any {
+	permissions := u.Permissions
+	if permissions == nil {
+		permissions = []string{"read", "write"}
+	}
 	return map[string]any{
 		"token":       token,
 		"user":        publicUser(u),
-		"permissions": []string{"read", "write"},
+		"permissions": permissions,
 		"config":      map[string]any{"branch_code": "1001", "branch_name": "Erbaa Eğitim Şubesi", "business_date": time.Now().Format("2006-01-02")},
 	}
 }
@@ -281,6 +317,10 @@ func fallbackListFor(path string, u fallbackUser) any {
 }
 
 func (s *fallbackState) apiHandler(legacy http.Handler) http.Handler {
+	return s.apiHandlerWithEngine(legacy, nil)
+}
+
+func (s *fallbackState) apiHandlerWithEngine(legacy http.Handler, engine *sim.Engine) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if p == "/api/public/branding" {
@@ -298,13 +338,41 @@ func (s *fallbackState) apiHandler(legacy http.Handler) http.Handler {
 			jsonOut(w, 200, authResponse(tok, u))
 			return
 		}
+		var durable sim.User
 		u, ok := s.session(r)
+		if engine != nil {
+			var err error
+			durable, err = engine.Session(bearerToken(r))
+			ok = err == nil
+			if ok {
+				u = compatibilityUser(durable)
+			}
+		}
 		if !ok {
 			jsonOut(w, http.StatusUnauthorized, map[string]string{"message": "Oturum bulunamadı veya süresi doldu."})
 			return
 		}
+		if p == "/api/logout" && engine != nil {
+			if r.Method != http.MethodPost {
+				jsonOut(w, http.StatusMethodNotAllowed, map[string]string{"message": "Yalnız POST desteklenir."})
+				return
+			}
+			if err := engine.Logout(bearerToken(r)); err != nil {
+				jsonOut(w, http.StatusServiceUnavailable, map[string]string{"message": "Oturum sonlandırılamadı."})
+				return
+			}
+			jsonOut(w, http.StatusOK, map[string]string{"status": "SIGNED_OUT"})
+			return
+		}
 		if p == "/api/me" {
-			jsonOut(w, 200, authResponse(bearerToken(r), u))
+			out := authResponse(bearerToken(r), u)
+			if engine != nil {
+				out["v3_token"] = bearerToken(r)
+			}
+			jsonOut(w, 200, out)
+			return
+		}
+		if engine != nil && servePersistentCompatibility(w, r, engine, durable) {
 			return
 		}
 

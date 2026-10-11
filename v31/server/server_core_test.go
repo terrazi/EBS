@@ -14,7 +14,9 @@ import (
 
 func TestCentralLoginReturnsV3SessionToken(t *testing.T) {
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	ts := httptest.NewServer(srv.Handler)
 	defer ts.Close()
 	close(stop)
@@ -68,7 +70,9 @@ func TestCentralHostedUIAndLegacyProxy(t *testing.T) {
 	defer legacySrv.Close()
 
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	v3Ln, err := net.Listen("tcp", "127.0.0.1:8792")
 	if err != nil {
 		t.Skipf("8792 test port unavailable: %v", err)

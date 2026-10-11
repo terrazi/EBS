@@ -3,102 +3,105 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
-	"syscall"
-	"unsafe"
+	"os/signal"
+	"sync"
+	"time"
+
+	"golang.org/x/sys/windows"
+	"golang.org/x/sys/windows/svc"
 )
 
-const (
-	serviceWin32OwnProcess              = 0x00000010
-	serviceStopped                      = 0x00000001
-	serviceStartPending                 = 0x00000002
-	serviceStopPending                  = 0x00000003
-	serviceRunning                      = 0x00000004
-	serviceAcceptStop                   = 0x00000001
-	serviceAcceptShutdown               = 0x00000004
-	serviceControlStop                  = 0x00000001
-	serviceControlShutdown              = 0x00000005
-	errorFailedServiceControllerConnect = 1063
-)
+const centralServiceName = "EBSv3ProService"
 
-type serviceStatus struct {
-	ServiceType             uint32
-	CurrentState            uint32
-	ControlsAccepted        uint32
-	Win32ExitCode           uint32
-	ServiceSpecificExitCode uint32
-	CheckPoint              uint32
-	WaitHint                uint32
-}
-type serviceTableEntry struct {
-	ServiceName *uint16
-	ServiceProc uintptr
-}
+type centralService struct{}
 
-var (
-	advapi              = syscall.NewLazyDLL("advapi32.dll")
-	procStartDispatcher = advapi.NewProc("StartServiceCtrlDispatcherW")
-	procRegisterHandler = advapi.NewProc("RegisterServiceCtrlHandlerExW")
-	procSetStatus       = advapi.NewProc("SetServiceStatus")
-	statusHandle        uintptr
-	stopCh              chan struct{}
-)
-
-func u16(s string) *uint16 { p, _ := syscall.UTF16PtrFromString(s); return p }
-func setStatus(state, accepted, wait uint32) {
-	st := serviceStatus{ServiceType: serviceWin32OwnProcess, CurrentState: state, ControlsAccepted: accepted, WaitHint: wait}
-	procSetStatus.Call(statusHandle, uintptr(unsafe.Pointer(&st)))
-}
-func serviceHandler(ctrl, eventType, eventData, context uintptr) uintptr {
-	if ctrl == serviceControlStop || ctrl == serviceControlShutdown {
-		setStatus(serviceStopPending, 0, 5000)
+// SCM stays START_PENDING while SQLite initializes. Checkpoints distinguish a
+// slow cold start from a hung service; RUNNING is reported only after the
+// transaction engine and HTTP listener are ready. Startup failures have a
+// service-specific exit code instead of looking like a successful stop.
+func (centralService) Execute(_ []string, requests <-chan svc.ChangeRequest, statuses chan<- svc.Status) (bool, uint32) {
+	stop := make(chan struct{})
+	var stopOnce sync.Once
+	requestStop := func() { stopOnce.Do(func() { close(stop) }) }
+	defer requestStop()
+	ready := make(chan struct{})
+	result := make(chan error, 1)
+	go func() {
+		result <- runServerWithReady(stop, func() { close(ready) })
+	}()
+	status := svc.Status{State: svc.StartPending, CheckPoint: 1, WaitHint: 180000}
+	statuses <- status
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	for {
 		select {
-		case <-stopCh:
-		default:
-			close(stopCh)
+		case <-ready:
+			ready = nil
+			if status.State == svc.StartPending {
+				status = svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown}
+				statuses <- status
+			}
+		case <-ticker.C:
+			if status.State == svc.StartPending || status.State == svc.StopPending {
+				status.CheckPoint++
+				statuses <- status
+			}
+		case request, ok := <-requests:
+			if !ok {
+				requestStop()
+				requests = nil
+				continue
+			}
+			switch request.Cmd {
+			case svc.Interrogate:
+				statuses <- status
+			case svc.Stop, svc.Shutdown:
+				status = svc.Status{State: svc.StopPending, CheckPoint: 1, WaitHint: 10000}
+				statuses <- status
+				requestStop()
+			}
+		case err := <-result:
+			if err != nil {
+				log.Printf("service server: %v", err)
+				return true, 1
+			}
+			return false, 0
 		}
 	}
-	return 0
 }
-func serviceMain(argc, argv uintptr) uintptr {
-	stopCh = make(chan struct{})
-	h, _, _ := procRegisterHandler.Call(uintptr(unsafe.Pointer(u16("EBSv3ProService"))), syscall.NewCallback(serviceHandler), 0)
-	statusHandle = h
-	if statusHandle == 0 {
-		return 0
+
+func runConsole() {
+	stop := make(chan struct{})
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	defer signal.Stop(signals)
+	go func() {
+		<-signals
+		close(stop)
+	}()
+	if err := runServer(stop); err != nil {
+		log.Fatal(err)
 	}
-	setStatus(serviceStartPending, 0, 3000)
-	setStatus(serviceRunning, serviceAcceptStop|serviceAcceptShutdown, 0)
-	if err := runServer(stopCh); err != nil {
-		log.Printf("service server: %v", err)
-	}
-	setStatus(serviceStopped, 0, 0)
-	return 0
 }
-func runAsService() bool {
-	entries := [2]serviceTableEntry{{ServiceName: u16("EBSv3ProService"), ServiceProc: syscall.NewCallback(serviceMain)}, {}}
-	r, _, e := procStartDispatcher.Call(uintptr(unsafe.Pointer(&entries[0])))
-	if r != 0 {
-		return true
-	}
-	if errno, ok := e.(syscall.Errno); ok && uint32(errno) == errorFailedServiceControllerConnect {
-		return false
-	}
-	return false
-}
+
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--console" {
-		ch := make(chan struct{})
-		if err := runServer(ch); err != nil {
-			log.Fatal(err)
-		}
+		runConsole()
 		return
 	}
-	if !runAsService() {
-		ch := make(chan struct{})
-		if err := runServer(ch); err != nil {
-			log.Fatal(err)
-		}
+	// The dispatcher handshake is authoritative. Parent-process heuristics
+	// can misclassify SCM launches and leave a console process running while
+	// the installer receives ERROR_SERVICE_REQUEST_TIMEOUT. Only the explicit
+	// "not connected to SCM" result is eligible for interactive fallback.
+	err := svc.Run(centralServiceName, centralService{})
+	if errors.Is(err, windows.ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
+		runConsole()
+		return
+	}
+	if err != nil {
+		log.Fatalf("SCM registration: %v", err)
 	}
 }

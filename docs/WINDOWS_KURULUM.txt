@@ -1,0 +1,32 @@
+EBS v3.1 — WINDOWS KURULUMU
+
+Windows 10/11 x64: ZIP'i bir klasöre çıkarın. Sunucu/eğitmen bilgisayarında
+EBS_Admin_Installer.exe dosyasını çalıştırın ve Windows yönetici iznini onaylayın.
+Admin paketi merkezi Server ile Admin, Personel ve Müşteri istemcilerini kurar.
+Veritabanındaki mevcut eğitim verileri korunur.
+
+Kurulumun Server sağlık kontrolünü tamamlamasını bekleyin. Başarılı kurulumdan
+sonra masaüstündeki yeni Admin kısayolunu kullanın. Server, Windows hizmeti
+olarak otomatik başlar; servis EXE'sini veya eski başlangıç BAT/CMD dosyalarını
+ayrıca çalıştırmayın.
+
+Uzak personel bilgisayarında EBS_Personel_Installer.exe; müşteri bilgisayarında
+EBS_Musteri_Installer.exe çalıştırılır. Bunlar merkezi Server kurmaz. Admin
+bilgisayarı açık ve aynı yerel ağda olmalıdır. Otomatik keşif olmazsa Admin
+bilgisayarının IP adresini/bilgisayar adını istemcinin bağlantı ekranına girin.
+Merkezi bağlantı TCP 8792; otomatik keşif UDP 8793 kullanır.
+
+Eğitim giriş hesapları GIRIS_BILGILERI.txt dosyasındadır.
+
+Kurulum başarısız olursa hata penceresindeki gerçek nedeni ve günlük yolunu
+kontrol edin. Genel 'başlatılamadı' ifadesi tek başına başarı/başarısızlık
+nedeni değildir. Veritabanını silmeyin; tanı için bu dosyaları saklayın:
+C:\ProgramData\EBS Bankacilik ve Sigortacilik\logs\EBS_v3_1_Kurulum.log
+C:\ProgramData\EBS Bankacilik ve Sigortacilik\v3pro\service.log
+
+Admin bilgisayarında http://localhost:8792/health adresi hazır Server'da
+JSON olarak protocol=ebs-v31, build=20261011-startup-fix-1 ve engine_ready=true
+döndürür. Eski Server'ı veya hazır olmayan veritabanını güncel istemci kabul etmez.
+
+BUILD_MANIFEST.json, kaynak commit'ini ve derlenmiş istemci/Server/kurulum
+dosyalarının SHA256 özetlerini içerir. Kaynak ZIP'i kurulum için kullanılmaz.

@@ -45,7 +45,9 @@ func authGet(t *testing.T, base, path, tok string) *http.Response {
 
 func TestCentralAPILoginWithoutLegacy(t *testing.T) {
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	ts := httptest.NewServer(srv.Handler)
 	defer ts.Close()
 	close(stop)
@@ -61,29 +63,33 @@ func TestCentralAPILoginWithoutLegacy(t *testing.T) {
 	resp = authGet(t, ts.URL, "/api/customers?limit=5000", tok)
 	b, _ = io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if resp.StatusCode != 200 || !strings.Contains(string(b), "Ayşe") {
+	if resp.StatusCode != 200 || !strings.Contains(string(b), "Ahmet") {
 		t.Fatalf("customers=%d %s", resp.StatusCode, b)
 	}
 }
 
 func TestCustomerLoginAndSummary(t *testing.T) {
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	ts := httptest.NewServer(srv.Handler)
 	defer ts.Close()
 	close(stop)
-	tok := loginTest(t, ts.URL, "Ayşe Yılmaz", "1234")
+	tok := loginTest(t, ts.URL, "Ahmet Karaca", "1234")
 	resp := authGet(t, ts.URL, "/api/customer-portal/summary", tok)
 	b, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if resp.StatusCode != 200 || !strings.Contains(string(b), "POL-2026-001245") {
+	if resp.StatusCode != 200 || !strings.Contains(string(b), "Ahmet") || !strings.Contains(string(b), `"accounts":[{`) {
 		t.Fatalf("summary=%d %s", resp.StatusCode, b)
 	}
 }
 
 func TestAllDefaultStaffCredentials(t *testing.T) {
 	stop := make(chan struct{})
-	srv := newHTTPServer(stop)
+	t.Setenv("ProgramData", t.TempDir())
+	srv, cleanup := newHTTPServer(stop)
+	defer cleanup()
 	ts := httptest.NewServer(srv.Handler)
 	defer ts.Close()
 	close(stop)

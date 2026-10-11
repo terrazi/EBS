@@ -52,7 +52,7 @@ func clientAllowed(role, client string) bool {
 	case "ADMIN":
 		return client == "admin" || client == "personel" || client == "personnel"
 	case "PERSONEL":
-		return client == "personel" || client == "personnel" || client == "admin"
+		return client == "personel" || client == "personnel"
 	case "CUSTOMER":
 		return client == "musteri" || client == "customer" || client == "client"
 	default:

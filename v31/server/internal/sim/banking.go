@@ -853,7 +853,12 @@ func (e *Engine) BankingQuery(u User, resource string, q url.Values) (any, bool,
 			}
 		}
 		var customers, accounts, transfers, payments int64
-		if err = e.DB.QueryRow("SELECT COUNT(*) FROM customers WHERE 1=1"+where, args...).Scan(&customers); err == nil {
+		customerWhere := where
+		if u.Role == "CUSTOMER" {
+			// customers owns its identity in id; related tables use customer_id.
+			customerWhere = " AND id=?"
+		}
+		if err = e.DB.QueryRow("SELECT COUNT(*) FROM customers WHERE 1=1"+customerWhere, args...).Scan(&customers); err == nil {
 			if err = e.DB.QueryRow("SELECT COUNT(*) FROM accounts WHERE 1=1"+where, args...).Scan(&accounts); err == nil {
 				if err = e.DB.QueryRow("SELECT COUNT(*) FROM banking_transfers WHERE 1=1"+where, args...).Scan(&transfers); err == nil {
 					err = e.DB.QueryRow("SELECT COUNT(*) FROM payments WHERE 1=1"+where, args...).Scan(&payments)

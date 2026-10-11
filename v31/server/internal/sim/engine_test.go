@@ -1,12 +1,16 @@
 package sim
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/ncruces/go-sqlite3"
+	"github.com/ncruces/go-sqlite3/vfs"
 )
 
 func TestSQLiteDSNUsesURIAndEscapesWindowsPath(t *testing.T) {
@@ -15,8 +19,8 @@ func TestSQLiteDSNUsesURIAndEscapesWindowsPath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if u.Scheme != "file" || u.Path != "/C:/Program Files/EBS Bankacılık/müşteri #1?.sqlite3" {
-		t.Fatalf("unexpected file URI: %s (path=%q)", got, u.Path)
+	if u.Scheme != "file" || u.Opaque != "C:/Program%20Files/EBS%20Bankac%C4%B1l%C4%B1k/m%C3%BC%C5%9Fteri%20%231%3F.sqlite3" {
+		t.Fatalf("unexpected file URI: %s (opaque=%q)", got, u.Opaque)
 	}
 	q := u.Query()
 	if got := q["_pragma"]; len(got) != 2 || got[0] != "foreign_keys(1)" || got[1] != "busy_timeout(10000)" {
@@ -30,9 +34,54 @@ func TestSQLiteDSNUsesURIAndEscapesWindowsPath(t *testing.T) {
 	}
 }
 
+// The embedded SQLite WASM parser is platform independent. Capture the real
+// filename it passes to the Go VFS, rather than merely checking net/url output.
+// This catches file:///C:/... being handed to Windows as the invalid /C:/....
+func TestSQLiteDSNPassesNativePathsToActualSQLiteVFS(t *testing.T) {
+	cases := []struct {
+		name, path, want string
+	}{
+		{"windows_drive", `C:\Program Files\EBS Bankacılık\müşteri #1?.sqlite3`, "C:/Program Files/EBS Bankacılık/müşteri #1?.sqlite3"},
+		{"unc", `\\server\share\EBS Bankacılık\müşteri #1?.sqlite3`, "//server/share/EBS Bankacılık/müşteri #1?.sqlite3"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			capture := &sqlitePathCaptureVFS{}
+			const vfsName = "ebs-dsn-regression"
+			vfs.Register(vfsName, capture)
+			defer vfs.Unregister(vfsName)
+			conn, err := sqlite3.Open(sqliteDSN(tc.path) + "&vfs=" + vfsName)
+			if conn != nil {
+				conn.Close()
+			}
+			if err == nil {
+				t.Fatal("capture VFS should stop before filesystem access")
+			}
+			if capture.path != tc.want {
+				t.Fatalf("actual SQLite VFS filename=%q, want %q; DSN=%s", capture.path, tc.want, sqliteDSN(tc.path))
+			}
+		})
+	}
+}
+
+type sqlitePathCaptureVFS struct{ path string }
+
+func (v *sqlitePathCaptureVFS) FullPathname(path string) (string, error) {
+	v.path = path
+	return "", errors.New("stop after capturing SQLite VFS path")
+}
+func (*sqlitePathCaptureVFS) Open(_ string, flags vfs.OpenFlag) (vfs.File, vfs.OpenFlag, error) {
+	return nil, flags, errors.New("unexpected filesystem access")
+}
+func (*sqlitePathCaptureVFS) Delete(string, bool) error { return errors.New("unexpected delete") }
+func (*sqlitePathCaptureVFS) Access(string, vfs.AccessFlag) (bool, error) {
+	return false, errors.New("unexpected filesystem access")
+}
+
 func TestEngineOpenPersistsAndAppliesSQLitePragmas(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "müşteri #1?.sqlite3")
+	// '?' is illegal in a native Windows filename; retain Unicode, spaces and '#'.
+	path := filepath.Join(dir, "müşteri #1.sqlite3")
 	e, err := Open(path)
 	if err != nil {
 		t.Fatal(err)
@@ -59,8 +108,16 @@ func TestEngineOpenPersistsAndAppliesSQLitePragmas(t *testing.T) {
 	if _, err = os.Stat(path); err != nil {
 		t.Fatalf("database path was not created: %v", err)
 	}
-	if _, err = os.Stat(path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(10000)"); !os.IsNotExist(err) {
-		t.Fatalf("legacy query-suffixed database unexpectedly exists: %v", err)
+	// Enumerating the directory works on Windows too: os.Stat on a name with
+	// '?' returns an invalid-name error there rather than os.ErrNotExist.
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if strings.Contains(entry.Name(), "?_pragma=") {
+			t.Fatalf("legacy query-suffixed database unexpectedly exists: %s", entry.Name())
+		}
 	}
 	e, err = Open(path)
 	if err != nil {

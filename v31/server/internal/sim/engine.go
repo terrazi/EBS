@@ -64,37 +64,26 @@ func Open(path string) (*Engine, error) {
 // sqliteDSN returns a real SQLite URI rather than appending query text to a
 // filename. The latter happens to create a file containing a '?' on Unix, but
 // is rejected by Windows and silently disables the driver's _pragma handling.
-// URL construction also protects spaces, Unicode, '#' and '?' in the path.
+// Escaping also protects spaces, Unicode, '#' and '?' in the path. The bundled
+// SQLite WASM build uses SQLITE_OS_OTHER: unlike native Windows SQLite, its URI
+// parser does not remove the leading slash from file:///C:/... before handing
+// the filename to the Go VFS. Drive paths must therefore use file:C:/....
 func sqliteDSN(path string) string {
 	p := strings.ReplaceAll(path, `\`, "/")
-	u := url.URL{Scheme: "file"}
-	switch {
-	case strings.HasPrefix(p, "//"):
-		// Preserve UNC paths as a file URI authority.
-		rest := strings.TrimPrefix(p, "//")
-		if i := strings.IndexByte(rest, '/'); i >= 0 {
-			u.Host, u.Path = rest[:i], rest[i:]
-		} else {
-			u.Host = rest
-		}
-	case len(p) >= 2 && p[1] == ':':
-		// A Windows drive path must have a leading slash in a file URI:
-		// file:///C:/Program%20Files/…
-		u.Path = "/" + p
-	default:
+	if !strings.HasPrefix(p, "//") && !(len(p) >= 2 && p[1] == ':') {
 		// Open is normally given an absolute path. Making relative paths
-		// absolute avoids interpreting the first path component as a URI host.
+		// absolute also resolves the drive on Windows before URI construction.
 		if abs, err := filepath.Abs(path); err == nil {
-			u.Path = filepath.ToSlash(abs)
-		} else {
-			u.Path = p
+			p = filepath.ToSlash(abs)
 		}
 	}
+	// Avoid URL.String's hierarchical file:/// representation for drive paths.
+	// SQLite percent-decodes this path and preserves UNC's leading //.
+	u := url.URL{Path: p}
 	q := url.Values{}
 	q.Add("_pragma", "foreign_keys(1)")
 	q.Add("_pragma", "busy_timeout(10000)")
-	u.RawQuery = q.Encode()
-	return u.String()
+	return "file:" + u.EscapedPath() + "?" + q.Encode()
 }
 
 func (e *Engine) ensure() error {

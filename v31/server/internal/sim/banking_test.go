@@ -316,3 +316,59 @@ func TestBankingProductFlowsPersistStateAndJournal(t *testing.T) {
 		t.Fatalf("expected journals for product flows, got %d", journalRows)
 	}
 }
+
+func TestCustomerDashboardCountsOnlyOwnedRows(t *testing.T) {
+	e := testEngine(t)
+	var ownID, otherID int64
+	if err := e.DB.QueryRow("SELECT id FROM customers WHERE code='CUST-0001'").Scan(&ownID); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.DB.QueryRow("SELECT id FROM customers WHERE code='CUST-0002'").Scan(&otherID); err != nil {
+		t.Fatal(err)
+	}
+	var ownAccount, otherAccount int64
+	if err := e.DB.QueryRow("SELECT id FROM accounts WHERE customer_id=? AND currency='TRY'", ownID).Scan(&ownAccount); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.DB.QueryRow("SELECT id FROM accounts WHERE customer_id=? AND currency='TRY'", otherID).Scan(&otherAccount); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.DB.Exec("INSERT INTO accounts(customer_id,iban,account_type,currency,balance_minor,status,opened_at) VALUES(?,'TEST-OTHER-EUR','Vadesiz','EUR',100,'ACTIVE',?)", otherID, Now()); err != nil {
+		t.Fatal(err)
+	}
+	for i, cid := range []int64{ownID, otherID, otherID} {
+		account, target := ownAccount, otherAccount
+		if cid == otherID {
+			account, target = otherAccount, ownAccount
+		}
+		if _, err := e.DB.Exec(`INSERT INTO banking_transfers(reference,customer_id,source_account_id,target_account_id,amount_minor,currency,transfer_type,status,created_by,created_at)
+VALUES(?,?,?,?,100,'TRY','HAVALE','COMPLETED','test',?)`, fmt.Sprintf("DASH-TR-%d", i), cid, account, target, Now()); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := e.DB.Exec(`INSERT INTO payments(reference,customer_id,account_id,institution,amount_minor,currency,kind,status,created_by,created_at)
+VALUES(?,?,?,'Eğitim',100,'TRY','BILL','COMPLETED','test',?)`, fmt.Sprintf("DASH-PAY-%d", i), cid, account, Now()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	customer := User{Role: "CUSTOMER", CustomerID: ownID, Permissions: []string{"self_service"}}
+	out, known, err := e.BankingQuery(customer, "dashboard", url.Values{"customer_id": {fmt.Sprint(otherID)}})
+	if err != nil || !known {
+		t.Fatalf("customer dashboard known=%v err=%v", known, err)
+	}
+	counts := out.(Result)
+	for key, want := range map[string]int64{"customers": 1, "accounts": 2, "transfers": 1, "payments": 1} {
+		if counts[key] != want {
+			t.Fatalf("customer count %s=%v, want=%d: %v", key, counts[key], want, counts)
+		}
+	}
+	out, known, err = e.BankingQuery(User{Role: "ADMIN"}, "dashboard", url.Values{})
+	if err != nil || !known {
+		t.Fatalf("admin dashboard known=%v err=%v", known, err)
+	}
+	counts = out.(Result)
+	for key, want := range map[string]int64{"customers": 30, "accounts": 61, "transfers": 3, "payments": 3} {
+		if counts[key] != want {
+			t.Fatalf("admin count %s=%v, want=%d: %v", key, counts[key], want, counts)
+		}
+	}
+}
