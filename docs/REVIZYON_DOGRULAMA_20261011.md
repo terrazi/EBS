@@ -21,3 +21,15 @@ Doğrulama kapsamı:
 - ZIP’ler tek derlemeden üretiliyor. Paketleme, derleme sonrasında kaynak veya payload değişmişse duruyor; arşiv bütünlüğü ve yayınlanan dosya SHA256 değerleri denetleniyor.
 
 Wine kontrolleri fiziksel Windows 10/11 UAC, Defender, kısayol, güvenlik duvarı veya ayrı bilgisayarlardan sınıf ağı testinin yerine geçmez. Bu paket kurulum/giriş sorunları için düzeltmedir. Önceki kapsam raporlarında açık kalan 206 kartın tümünün kabulü ve kalıcı hasar işlem motoru tamamlanmış değildir; bu sürüm bunların tamamlandığı beyanını taşımaz.
+
+Wine, Windows'taki başlangıç hatalarında yeniden başlatma ayarı için kullanılan `ChangeServiceConfig2` level4 API'sini desteklemiyor. Yerel SCM kurulum yardımcıları, yalnız bu ayar /tmp test kopyasında atlanarak çalıştırıldı; üretim kurucusunda ayar korunuyor. Wine altında kısayol denetimi de ancak `--install-unattended --test-skip-shortcuts` açık test bayraklarıyla atlanabilir ve günlüğe yazılır. Bu sınırlar tam Windows kurulum kabulü olarak sunulamaz.
+
+Bulut ortamının `cloud_setup.sh` ve `cloud_start.sh` akışları aynı Go merkezi Server'ını çalıştırır. Go1.23.2 indirmesi resmi SHA256 ile doğrulanır; Python prototipi Windows çalışma zamanı gibi gösterilmez.
+
+Son derlemenin ek denetimi:
+
+- Nihai Windows Server SHA256: `0435c355f966169acc874dbde51e7b515158990b13ddc203a01f59ac29d6492f`.
+- Nihai Admin kurucusu Wine'da desteklenmeyen level4 ayarında açık hata ve exit1 döndürdü; yanlış başarı göstermedi. O aşamaya kadar kurduğu dört EXE'nin tamamı manifest ile aynı çıktı.
+- Personel ve Müşteri kurucuları, yalnız kısayol doğrulaması açık test bayrağıyla atlanarak Wine'da exit0 döndürdü; kurulan EXE'ler manifest ile eşleşti. Bu, fiziksel kısayol/UAC kabulü değildir.
+- Linux Chromium, Wine SCM'nin çalıştırdığı nihai Windows Server'a bağlandı. Admin, Personel ve Müşteri giriş sayfalarında yanlış şifre, başarılı giriş, rol ana ekranı, oturumla sayfayı yenileme ve çıkış denetlendi. Yakalanmayan JavaScript hatası ve eski ikinci v3 giriş isteği görülmedi.
+- Sunucunun gömülü `app.js` SHA256 değeri derlenen kaynakla eşleşti: `f2cfe725f9d61c3efd434d741fa6510218f491e3aacf0310c422baa8e755805f`.

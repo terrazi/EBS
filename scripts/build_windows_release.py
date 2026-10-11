@@ -109,6 +109,9 @@ def package(args):
     instructions = ROOT / "docs/WINDOWS_KURULUM.txt"
     if instructions.exists():
         shutil.copy2(instructions, install / "KURULUM_SIRASI.txt")
+    report = ROOT / "docs/REVIZYON_DOGRULAMA_20261011.md"
+    if report.exists():
+        shutil.copy2(report, install / "DOGRULAMA_RAPORU.md")
     (install / "BUILD_MANIFEST.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
     (install / "SHA256SUMS.txt").write_text("".join(
         f"{sha}  {name}\n" for name, sha in manifest["installers"].items()))
